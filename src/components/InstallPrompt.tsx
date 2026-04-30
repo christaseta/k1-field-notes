@@ -78,43 +78,28 @@ export function InstallPrompt() {
   }
 
   return (
-    <div className="fixed bottom-16 left-0 right-0 bg-[var(--bg-card)] text-white p-4 shadow-lg z-50 safe-area-inset-bottom border-t border-[var(--divider)]">
+    <div
+      className="fixed bottom-16 left-0 right-0 bg-black text-white px-4 pt-4 shadow-lg z-50 border-b border-[var(--divider)]"
+      style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))" }}
+    >
       <div className="max-w-md mx-auto flex items-center justify-between gap-4">
         <div className="flex-1">
-          <p className="font-semibold">Install Field Notes</p>
-          {isIOS ? (
-            <p className="text-sm text-slate-300">
-              Tap{" "}
-              <span className="inline-flex items-center">
-                <svg
-                  className="w-4 h-4 mx-1"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L11 6.414V13a1 1 0 11-2 0V6.414L7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3z" />
-                  <path d="M3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" />
-                </svg>
-              </span>{" "}
-              then &quot;Add to Home Screen&quot;
-            </p>
-          ) : (
-            <p className="text-sm text-slate-300">
-              Add to your home screen for the best experience
-            </p>
-          )}
+          <p className="text-sm text-[var(--text-standard)]">
+            Add Field Notes to your home screen for quicker access.
+          </p>
         </div>
         <div className="flex gap-2">
           {!isIOS && (
             <button
               onClick={handleInstallClick}
-              className="bg-white text-slate-900 px-4 py-2 rounded-lg font-medium hover:bg-slate-100 transition-colors"
+              className="bg-white text-black px-4 py-2 rounded-full font-medium hover:bg-slate-100 transition-colors"
             >
-              Install
+              Add now
             </button>
           )}
           <button
             onClick={handleDismiss}
-            className="text-slate-400 hover:text-white p-2 transition-colors"
+            className="text-white hover:text-[var(--text-subtle)] p-1 transition-colors"
             aria-label="Dismiss"
           >
             <svg
