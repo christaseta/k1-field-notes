@@ -3,7 +3,12 @@
  * /public/icons/ui (already converted to currentColor so they pick up text color).
  */
 
-export type IconName = "mic" | "gear" | "paper-pencil" | "arrow-clock";
+export type IconName =
+  | "mic"
+  | "gear"
+  | "paper-pencil"
+  | "arrow-clock"
+  | "check-fill";
 
 const SIZE_DEFAULT = 24;
 

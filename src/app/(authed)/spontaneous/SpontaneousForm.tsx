@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { VoiceTextInput } from "@/components/VoiceTextInput";
 import { submitFeedback } from "@/app/actions/submit";
 
@@ -10,11 +9,12 @@ export function SpontaneousForm() {
   const [method, setMethod] = useState<"voice" | "text">("text");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const router = useRouter();
+
+  const canSend = note.trim().length > 0;
 
   const submit = () => {
     setError(null);
-    if (!note.trim()) {
+    if (!canSend) {
       setError("Add a note before sending.");
       return;
     }
@@ -50,20 +50,17 @@ export function SpontaneousForm() {
         </p>
       )}
 
-      <div className="fixed bottom-20 inset-x-0 px-4 safe-area-inset-bottom">
-        <div className="max-w-md mx-auto flex gap-3">
-          <button
-            type="button"
-            onClick={() => router.push("/home")}
-            className="flex-1 py-4 rounded-2xl border border-[var(--divider)] bg-[var(--bg-card)] text-[var(--text-standard)] font-medium hover:bg-[#222]"
-          >
-            Cancel
-          </button>
+      <div className="fixed bottom-16 inset-x-0 px-4 pb-2 pt-2 bg-[var(--bg-app)]">
+        <div className="max-w-md mx-auto">
           <button
             type="button"
             onClick={submit}
-            disabled={pending}
-            className="flex-[2] py-4 rounded-2xl bg-[var(--accent)] text-[var(--text-on-accent)] font-medium hover:bg-[var(--accent-strong)] disabled:opacity-60"
+            disabled={!canSend || pending}
+            className={`w-full min-h-[48px] py-3 px-6 rounded-full text-[16px] font-medium transition-colors ${
+              canSend && !pending
+                ? "bg-white text-black hover:bg-slate-100"
+                : "bg-[#2a2a2a] text-[var(--text-disabled)] cursor-not-allowed"
+            }`}
           >
             {pending ? "Sending…" : "Send"}
           </button>

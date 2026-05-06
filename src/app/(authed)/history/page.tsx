@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Submission } from "@/lib/db-types";
+import { TitleBar } from "@/components/TitleBar";
 
 const KIND_LABEL: Record<Submission["kind"], string> = {
   daily: "Daily",
@@ -18,10 +19,9 @@ export default async function HistoryPage() {
   const submissions = (rows ?? []) as Submission[];
 
   return (
-    <div className="pt-6 space-y-6">
-      <h1 className="text-[28px] leading-[32px] tracking-[-0.5px] text-[var(--text-standard)] font-medium">
-        Your notes
-      </h1>
+    <>
+      <TitleBar title="Your notes" />
+      <div className="max-w-md w-full mx-auto px-4 pt-6 space-y-6">
 
       {submissions.length === 0 ? (
         <div className="bg-[var(--bg-card)] rounded-3xl p-6 text-center">
@@ -50,7 +50,8 @@ export default async function HistoryPage() {
           ))}
         </ul>
       )}
-    </div>
+      </div>
+    </>
   );
 }
 

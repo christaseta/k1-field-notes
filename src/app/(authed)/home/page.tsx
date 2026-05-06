@@ -9,6 +9,7 @@ import { currentProgramWeek, programLabel, timeOfDayGreeting } from "@/lib/progr
 import { dailyStatus, weeklyStatus, type StatusPill as StatusPillType } from "@/lib/status";
 import { StatusPill } from "@/components/StatusPill";
 import { VoicePromptHero } from "@/components/VoicePromptHero";
+import { TitleBar } from "@/components/TitleBar";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -54,8 +55,10 @@ export default async function HomePage() {
   const week = currentProgramWeek(now);
 
   return (
-    <div className="pt-6 space-y-6">
-      <section className="space-y-4">
+    <>
+      <TitleBar title="Field Notes" />
+      <div className="max-w-md w-full mx-auto px-4 pt-6 space-y-6">
+        <section className="space-y-4">
         <h1 className="text-[40px] leading-[40px] tracking-[-1px] text-[var(--text-standard)] font-normal">
           {firstName ? (
             <>
@@ -93,8 +96,9 @@ export default async function HomePage() {
           pill={weeklyPill}
           done={weeklyComplete}
         />
-      </section>
-    </div>
+        </section>
+      </div>
+    </>
   );
 }
 

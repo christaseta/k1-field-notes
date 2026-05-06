@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/actions/auth";
 import { SettingsForm } from "./SettingsForm";
+import { TitleBar } from "@/components/TitleBar";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -13,10 +14,9 @@ export default async function SettingsPage() {
     .single();
 
   return (
-    <div className="pt-6 space-y-6">
-      <h1 className="text-[28px] leading-[32px] -tracking-[0.5px] text-[var(--text-strong)] font-medium">
-        Settings
-      </h1>
+    <>
+      <TitleBar title="Settings" />
+      <div className="max-w-md w-full mx-auto px-4 pt-6 space-y-6">
 
       <div className="bg-[var(--bg-card)] rounded-3xl p-6">
         <SettingsForm
@@ -38,7 +38,8 @@ export default async function SettingsPage() {
             Sign out
           </button>
         </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

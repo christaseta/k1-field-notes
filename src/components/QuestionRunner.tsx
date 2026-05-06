@@ -1,15 +1,22 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import type { Question, QuestionSet } from "@/lib/questions";
 import type { FeedbackKind } from "@/lib/db-types";
 import { VoiceTextInput } from "./VoiceTextInput";
+import { MultipleChoiceQuestion } from "./MultipleChoiceQuestion";
+import { TitleBar } from "./TitleBar";
+import { SegmentedProgress } from "./SegmentedProgress";
 import { submitFeedback } from "@/app/actions/submit";
 
 type Props = {
   set: QuestionSet;
   kind: Extract<FeedbackKind, "daily" | "weekly">;
+};
+
+const TITLE_BY_KIND: Record<Props["kind"], string> = {
+  daily: "Daily update",
+  weekly: "Weekly update",
 };
 
 export function QuestionRunner({ set, kind }: Props) {
@@ -20,7 +27,6 @@ export function QuestionRunner({ set, kind }: Props) {
   const [step, setStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const router = useRouter();
 
   const visibleQuestions = useMemo(
     () => set.questions.filter((q) => isVisible(q, answers)),
@@ -42,10 +48,14 @@ export function QuestionRunner({ set, kind }: Props) {
     setInputMethods((m) => ({ ...m, [id]: method }));
   };
 
+  const currentValue = answers[current.id]?.trim() ?? "";
+  // MC requires a selection; open is optional (skippable) per the brief.
+  const canAdvance =
+    current.type === "multiple_choice" ? currentValue.length > 0 : true;
+
   const onNext = () => {
     setError(null);
-    const value = answers[current.id]?.trim() ?? "";
-    if (current.type === "multiple_choice" && !value) {
+    if (current.type === "multiple_choice" && !currentValue) {
       setError("Pick one to continue.");
       return;
     }
@@ -62,91 +72,64 @@ export function QuestionRunner({ set, kind }: Props) {
     }
   };
 
-  const onBack = () => {
-    setError(null);
-    setStep((s) => Math.max(0, s - 1));
-  };
-
   return (
-    <div className="space-y-6 pb-32">
-      <ProgressBar step={step + 1} total={total} />
+    <>
+      <TitleBar
+        title={TITLE_BY_KIND[kind]}
+        right={`Question ${step + 1} of ${total}`}
+      />
 
-      <div className="space-y-5">
-        <p className="text-[12px] tracking-wider uppercase text-[var(--text-subtle)] font-medium">
-          Question {step + 1} of {total}
-        </p>
-        <h2 className="text-[24px] leading-[28px] -tracking-[0.18px] font-medium text-[var(--text-strong)]">
+      <div className="max-w-md w-full mx-auto px-4 pt-3">
+        <SegmentedProgress current={step + 1} total={total} />
+      </div>
+
+      <div className="max-w-md w-full mx-auto px-4 pt-10 pb-32">
+        <h2 className="text-[32px] leading-[32px] -tracking-[0.8px] font-normal text-[var(--text-standard)]">
           {current.prompt}
         </h2>
 
-        {current.type === "multiple_choice" ? (
-          <div className="space-y-3 pt-1">
-            {current.choices.map((c) => {
-              const selected = answers[current.id] === c.value;
-              return (
-                <button
-                  key={c.value}
-                  type="button"
-                  onClick={() => setAnswer(current.id, c.value, "choice")}
-                  className={`w-full text-left px-5 py-4 rounded-2xl text-[16px] transition-colors ${
-                    selected
-                      ? "bg-[var(--accent)] text-[var(--text-on-accent)] font-medium"
-                      : "bg-[var(--bg-card)] text-[var(--text-standard)] hover:bg-[#222]"
-                  }`}
-                >
-                  {c.label}
-                </button>
-              );
-            })}
-          </div>
-        ) : (
-          <VoiceTextInput
-            value={answers[current.id] ?? ""}
-            onChange={(value, method) => setAnswer(current.id, value, method)}
-            placeholder={current.placeholder}
-            autoFocus
-          />
+        <div className="pt-10">
+          {current.type === "multiple_choice" ? (
+            <MultipleChoiceQuestion
+              choices={current.choices}
+              value={answers[current.id] ?? null}
+              onChange={(value) => setAnswer(current.id, value, "choice")}
+            />
+          ) : (
+            <VoiceTextInput
+              value={answers[current.id] ?? ""}
+              onChange={(value, method) => setAnswer(current.id, value, method)}
+              placeholder={current.placeholder}
+              autoFocus
+            />
+          )}
+        </div>
+
+        {error && (
+          <p className="text-[13px] text-[#ff8b8b] text-center pt-4" role="alert">
+            {error}
+          </p>
         )}
       </div>
 
-      {error && (
-        <p className="text-[13px] text-[#ff8b8b] text-center" role="alert">
-          {error}
-        </p>
-      )}
-
-      <div className="fixed bottom-20 inset-x-0 px-4 safe-area-inset-bottom">
-        <div className="max-w-md mx-auto flex gap-3">
-          <button
-            type="button"
-            onClick={step === 0 ? () => router.push("/home") : onBack}
-            className="flex-1 py-4 rounded-2xl border border-[var(--divider)] bg-[var(--bg-card)] text-[var(--text-standard)] font-medium hover:bg-[#222]"
-          >
-            {step === 0 ? "Cancel" : "Back"}
-          </button>
+      {/* Single full-width Next, fixed above the tab bar. */}
+      <div className="fixed bottom-16 inset-x-0 px-4 pb-2 pt-2 bg-[var(--bg-app)]">
+        <div className="max-w-md mx-auto">
           <button
             type="button"
             onClick={onNext}
-            disabled={pending}
-            className="flex-[2] py-4 rounded-2xl bg-[var(--accent)] text-[var(--text-on-accent)] font-medium hover:bg-[var(--accent-strong)] disabled:opacity-60"
+            disabled={!canAdvance || pending}
+            className={`w-full min-h-[48px] py-3 px-6 rounded-full text-[16px] font-medium transition-colors ${
+              canAdvance && !pending
+                ? "bg-white text-black hover:bg-slate-100"
+                : "bg-[#2a2a2a] text-[var(--text-disabled)] cursor-not-allowed"
+            }`}
           >
             {pending ? "Submitting…" : isLast ? "Submit" : "Next"}
           </button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function ProgressBar({ step, total }: { step: number; total: number }) {
-  const pct = Math.round((step / total) * 100);
-  return (
-    <div className="h-1 bg-[var(--divider)] rounded-full overflow-hidden">
-      <div
-        className="h-full bg-[var(--accent)] transition-all"
-        style={{ width: `${pct}%` }}
-      />
-    </div>
+    </>
   );
 }
 
