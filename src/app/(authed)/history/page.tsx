@@ -20,7 +20,7 @@ export default async function HistoryPage() {
 
   return (
     <>
-      <TitleBar title="Your notes" />
+      <TitleBar title="Your notes" backHref="/home" />
       <div className="max-w-md w-full mx-auto px-4 pt-6 space-y-6">
 
       {submissions.length === 0 ? (

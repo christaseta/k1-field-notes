@@ -1,15 +1,89 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef } from "react";
 import { Icon } from "./Icon";
+import { useAudioVisualizer } from "@/hooks/useAudioVisualizer";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+
+/** sessionStorage key the spontaneous form reads on mount to pre-fill. */
+export const SPONTANEOUS_DRAFT_KEY = "fieldnotes:spontaneous-draft";
 
 /**
- * Hero CTA at the top of the home screen. Links into the spontaneous-feedback
- * flow. Background art is /public/voice-promt.png (360×90, matching Figma).
+ * Hero CTA on the home screen. Tapping the body navigates to /spontaneous.
+ * Press-and-hold the mic icon to start mic capture with a live waveform plus
+ * Web Speech transcription. On release, the transcript is stored in
+ * sessionStorage and the seller is taken to /spontaneous to review, edit,
+ * tag, and submit.
  */
 export function VoicePromptHero() {
+  const { status: visStatus, bars, start: startVis, stop: stopVis } =
+    useAudioVisualizer();
+  const {
+    transcript,
+    start: startSpeech,
+    stop: stopSpeech,
+    reset: resetSpeech,
+    supported: speechSupported,
+  } = useSpeechRecognition();
+  const router = useRouter();
+
+  // Mirror transcript into a ref so the pointerup handler always sees the
+  // latest value without re-binding listeners.
+  const transcriptRef = useRef("");
+  useEffect(() => {
+    transcriptRef.current = transcript;
+  }, [transcript]);
+
+  const holdingRef = useRef(false);
+
+  const beginHold = useCallback(() => {
+    if (holdingRef.current) return;
+    holdingRef.current = true;
+    resetSpeech();
+    void startVis();
+    if (speechSupported) startSpeech();
+  }, [resetSpeech, startVis, startSpeech, speechSupported]);
+
+  const endHold = useCallback(
+    (commit: boolean) => {
+      if (!holdingRef.current) return;
+      holdingRef.current = false;
+      stopVis();
+      stopSpeech();
+
+      if (commit) {
+        const text = transcriptRef.current.trim();
+        try {
+          sessionStorage.setItem(SPONTANEOUS_DRAFT_KEY, text);
+        } catch {
+          // sessionStorage may be unavailable (private mode) — proceed without it.
+        }
+        router.push("/spontaneous");
+      }
+    },
+    [stopVis, stopSpeech, router],
+  );
+
+  // Defensive cleanup if the user lifts the pointer outside the button or
+  // navigates away mid-press.
+  useEffect(() => {
+    const handleUp = () => endHold(true);
+    const handleCancel = () => endHold(false);
+    window.addEventListener("pointerup", handleUp);
+    window.addEventListener("pointercancel", handleCancel);
+    return () => {
+      window.removeEventListener("pointerup", handleUp);
+      window.removeEventListener("pointercancel", handleCancel);
+    };
+  }, [endHold]);
+
+  const isActive = visStatus === "active" || visStatus === "starting";
+
   return (
-    <Link
-      href="/spontaneous"
-      className="block relative overflow-hidden rounded-full active:scale-[0.99] transition-transform"
+    <div
+      className="relative overflow-hidden rounded-full"
       style={{
         backgroundImage: "url(/voice-promt.png)",
         backgroundSize: "cover",
@@ -18,13 +92,60 @@ export function VoicePromptHero() {
       }}
     >
       <div className="flex items-center gap-4 px-3 py-3 pr-6">
-        <span className="flex items-center justify-center w-12 h-12 rounded-full bg-[#f0f0f0] text-[#101010] shrink-0">
+        <button
+          type="button"
+          aria-label={isActive ? "Recording — release to stop" : "Hold to record"}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            (e.currentTarget as HTMLButtonElement).setPointerCapture(e.pointerId);
+            beginHold();
+          }}
+          onPointerUp={() => endHold(true)}
+          onContextMenu={(e) => e.preventDefault()}
+          className={`flex items-center justify-center w-12 h-12 rounded-full shrink-0 select-none transition-colors ${
+            isActive
+              ? "bg-[#101010] text-white"
+              : "bg-[#f0f0f0] text-[#101010] active:bg-white"
+          }`}
+        >
           <Icon name="mic" size={20} />
-        </span>
-        <span className="text-[16px] font-normal text-[#101010] leading-tight">
-          Record observations in real time
-        </span>
+        </button>
+
+        {isActive ? (
+          <Waveform bars={bars} />
+        ) : (
+          <Link
+            href="/spontaneous"
+            className="flex-1 text-[16px] font-normal text-[#101010] leading-tight"
+          >
+            {visStatus === "denied"
+              ? "Mic blocked — tap to type instead"
+              : visStatus === "error"
+                ? "Mic error — tap to type instead"
+                : "Record observations in real time"}
+          </Link>
+        )}
       </div>
-    </Link>
+    </div>
+  );
+}
+
+function Waveform({ bars }: { bars: number[] }) {
+  return (
+    <div
+      className="flex-1 flex items-center justify-center gap-[3px] h-12"
+      aria-hidden
+    >
+      {bars.map((amp, i) => {
+        const h = Math.max(4, Math.round(amp * 36));
+        return (
+          <span
+            key={i}
+            className="w-[3px] rounded-full bg-[#101010] transition-[height] duration-75"
+            style={{ height: `${h}px` }}
+          />
+        );
+      })}
+    </div>
   );
 }

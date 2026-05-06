@@ -76,26 +76,47 @@ export default async function HomePage() {
 
       <VoicePromptHero />
 
+      {/*
+        Completed cards drop to the bottom so the next thing-to-do is always
+        in the most reachable position.
+      */}
       <section className="flex flex-col gap-4">
-        <FeedbackCard
-          href={dailyDone ? null : "/daily"}
-          label="Daily"
-          modifier="Optional"
-          title="How'd today go?"
-          subtitle={`${dailyQuestionSet.questions.length} quick questions.`}
-          pill={dailyPill}
-          done={dailyDone}
-        />
-
-        <FeedbackCard
-          href={weeklyComplete ? null : "/weekly"}
-          label="Weekly"
-          modifier="Required"
-          title={`Week ${week} check-in`}
-          subtitle={subtitleForWeekly(weekly)}
-          pill={weeklyPill}
-          done={weeklyComplete}
-        />
+        {[
+          {
+            key: "daily",
+            done: dailyDone,
+            card: (
+              <FeedbackCard
+                href={dailyDone ? null : "/daily"}
+                label="Daily"
+                modifier="Optional"
+                title="How'd today go?"
+                subtitle={`${dailyQuestionSet.questions.length} quick questions.`}
+                pill={dailyPill}
+                done={dailyDone}
+              />
+            ),
+          },
+          {
+            key: "weekly",
+            done: weeklyComplete,
+            card: (
+              <FeedbackCard
+                href={weeklyComplete ? null : "/weekly"}
+                label="Weekly"
+                modifier="Required"
+                title={`Week ${week} check-in`}
+                subtitle={subtitleForWeekly(weekly)}
+                pill={weeklyPill}
+                done={weeklyComplete}
+              />
+            ),
+          },
+        ]
+          .sort((a, b) => Number(a.done) - Number(b.done))
+          .map(({ key, card }) => (
+            <div key={key}>{card}</div>
+          ))}
         </section>
       </div>
     </>

@@ -4,7 +4,7 @@ const VARIANT_STYLES: Record<StatusPillType["variant"], string> = {
   ready: "bg-[var(--pill-ready-bg)] text-[var(--text-on-accent)]",
   due: "bg-[var(--pill-due-bg)] text-white",
   overdue: "bg-[var(--pill-overdue-bg)] text-white",
-  complete: "bg-[var(--pill-complete-bg)] text-[var(--pill-complete-fg)]",
+  complete: "bg-[#2a2a2a] text-[var(--text-disabled)]",
 };
 
 export function StatusPill({ pill }: { pill: StatusPillType }) {

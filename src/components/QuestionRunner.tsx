@@ -77,6 +77,7 @@ export function QuestionRunner({ set, kind }: Props) {
       <TitleBar
         title={TITLE_BY_KIND[kind]}
         right={`Question ${step + 1} of ${total}`}
+        backHref="/home"
       />
 
       <div className="max-w-md w-full mx-auto px-4 pt-3">

@@ -13,7 +13,7 @@ export default async function ThanksPage(props: {
 
   return (
     <>
-      <TitleBar />
+      <TitleBar backHref="/home" />
       <div className="max-w-md w-full mx-auto px-4 text-center flex flex-col items-center justify-center min-h-[calc(100dvh-180px)] space-y-5">
         <Icon name="check-fill" size={48} className="text-white" />
         <h1 className="text-[28px] leading-[32px] -tracking-[0.5px] font-medium text-[var(--text-strong)]">

@@ -15,7 +15,7 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <TitleBar title="Settings" />
+      <TitleBar title="Settings" backHref="/home" />
       <div className="max-w-md w-full mx-auto px-4 pt-6 space-y-6">
 
       <div className="bg-[var(--bg-card)] rounded-3xl p-6">

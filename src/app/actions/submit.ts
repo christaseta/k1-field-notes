@@ -18,6 +18,8 @@ type SubmitInput = {
   // Spontaneous freeform note.
   note?: string;
   noteInputMethod?: "voice" | "text";
+  // Spontaneous-only — research-defined topic tags.
+  tags?: string[];
 };
 
 export async function submitFeedback(input: SubmitInput) {
@@ -54,12 +56,17 @@ export async function submitFeedback(input: SubmitInput) {
     if (!note) throw new Error("Spontaneous note cannot be empty");
   }
 
+  const tags = (input.tags ?? [])
+    .map((t) => t.trim())
+    .filter((t) => t.length > 0);
+
   const { error } = await supabase.from("submissions").insert({
     seller_id: user.id,
     kind: input.kind,
     question_set_id: questionSetId,
     answers: stored,
     note,
+    tags,
   });
 
   if (error) throw new Error(error.message);

@@ -24,5 +24,6 @@ export type Submission = {
   question_set_id: string | null;
   answers: StoredAnswer[];
   note: string | null;
+  tags: string[];
   submitted_at: string;
 };
