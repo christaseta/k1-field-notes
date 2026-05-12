@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import {
   currentWeeklySet,
@@ -6,10 +5,11 @@ import {
   type QuestionSet,
 } from "@/lib/questions";
 import { currentProgramWeek, programLabel, timeOfDayGreeting } from "@/lib/program";
-import { dailyStatus, weeklyStatus, type StatusPill as StatusPillType } from "@/lib/status";
-import { StatusPill } from "@/components/StatusPill";
+import { dailyStatus, weeklyStatus } from "@/lib/status";
 import { VoicePromptHero } from "@/components/VoicePromptHero";
 import { TitleBar } from "@/components/TitleBar";
+import { FeedbackCard } from "@/components/FeedbackCard";
+import { FeedbackCardSheet } from "@/components/FeedbackCardSheet";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -56,10 +56,10 @@ export default async function HomePage() {
 
   return (
     <>
-      <TitleBar title="Field Notes" />
+      <TitleBar />
       <div className="max-w-md w-full mx-auto px-4 pt-6 space-y-6">
         <section className="space-y-4">
-        <h1 className="text-[40px] leading-[40px] tracking-[-1px] text-[var(--text-standard)] font-normal">
+        <h1 className="text-[40px] leading-[42px] tracking-[-1px] text-[var(--text-standard)] font-normal">
           {firstName ? (
             <>
               {greeting},<br />
@@ -74,7 +74,9 @@ export default async function HomePage() {
         </p>
       </section>
 
-      <VoicePromptHero />
+      <div className="pt-4">
+        <VoicePromptHero />
+      </div>
 
       {/*
         Completed cards drop to the bottom so the next thing-to-do is always
@@ -86,30 +88,32 @@ export default async function HomePage() {
             key: "daily",
             done: dailyDone,
             card: (
-              <FeedbackCard
-                href={dailyDone ? null : "/daily"}
-                label="Daily"
-                modifier="Optional"
-                title="How'd today go?"
-                subtitle={`${dailyQuestionSet.questions.length} quick questions.`}
-                pill={dailyPill}
-                done={dailyDone}
-              />
+              <FeedbackCardSheet kind="daily" set={dailyQuestionSet} done={dailyDone}>
+                <FeedbackCard
+                  label="Daily"
+                  modifier="Optional"
+                  title="How'd today go?"
+                  subtitle={`${dailyQuestionSet.questions.length} quick questions.`}
+                  pill={dailyPill}
+                  done={dailyDone}
+                />
+              </FeedbackCardSheet>
             ),
           },
           {
             key: "weekly",
             done: weeklyComplete,
             card: (
-              <FeedbackCard
-                href={weeklyComplete ? null : "/weekly"}
-                label="Weekly"
-                modifier="Required"
-                title={`Week ${week} check-in`}
-                subtitle={subtitleForWeekly(weekly)}
-                pill={weeklyPill}
-                done={weeklyComplete}
-              />
+              <FeedbackCardSheet kind="weekly" set={weekly} done={weeklyComplete}>
+                <FeedbackCard
+                  label="Weekly"
+                  modifier="Required"
+                  title={`Week ${week} check-in`}
+                  subtitle={subtitleForWeekly(weekly)}
+                  pill={weeklyPill}
+                  done={weeklyComplete}
+                />
+              </FeedbackCardSheet>
             ),
           },
         ]
@@ -130,48 +134,3 @@ function subtitleForWeekly(set: QuestionSet): string {
   return `${n} questions, around ${minutes} min to complete.`;
 }
 
-function FeedbackCard({
-  href,
-  label,
-  modifier,
-  title,
-  subtitle,
-  pill,
-  done,
-}: {
-  href: string | null;
-  label: string;
-  modifier: string;
-  title: string;
-  subtitle: string;
-  pill: StatusPillType;
-  done: boolean;
-}) {
-  const inner = (
-    <div
-      className={`bg-[var(--bg-card)] rounded-3xl p-6 flex flex-col gap-6 ${
-        done ? "opacity-70" : "active:scale-[0.99] transition-transform"
-      }`}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-[14px] font-medium text-[var(--text-standard)] leading-5">
-          {label}{" "}
-          <span className="text-[var(--text-strong)]">·</span>{" "}
-          <span>{modifier}</span>
-        </p>
-        <StatusPill pill={pill} />
-      </div>
-      <div className="space-y-2">
-        <h2 className="text-[24px] leading-[24px] -tracking-[0.18px] font-medium text-[var(--text-strong)]">
-          {title}
-        </h2>
-        <p className="text-[14px] text-[var(--text-subtle)] -tracking-[0.035px]">
-          {subtitle}
-        </p>
-      </div>
-    </div>
-  );
-
-  if (!href) return inner;
-  return <Link href={href}>{inner}</Link>;
-}

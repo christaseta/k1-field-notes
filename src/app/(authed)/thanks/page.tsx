@@ -25,7 +25,7 @@ export default async function ThanksPage(props: {
         <div className="pt-4">
           <Link
             href="/home"
-            className="inline-block bg-white text-black px-6 py-3 rounded-full font-medium hover:bg-slate-100"
+            className="inline-flex items-center justify-center bg-white text-black px-6 min-h-[64px] rounded-full text-[16px] font-medium hover:bg-slate-100"
           >
             Back to home
           </Link>

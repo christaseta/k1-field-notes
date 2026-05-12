@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
   dailyQuestionSet,
@@ -70,8 +69,6 @@ export async function submitFeedback(input: SubmitInput) {
   });
 
   if (error) throw new Error(error.message);
-
-  redirect("/thanks");
 }
 
 function isQuestionVisible(
