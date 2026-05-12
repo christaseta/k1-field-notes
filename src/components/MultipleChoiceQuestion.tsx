@@ -29,8 +29,8 @@ export function MultipleChoiceQuestion({ choices, value, onChange }: Props) {
             onClick={() => onChange(c.value)}
             className={`w-full text-left px-6 min-h-[64px] rounded-full text-[16px] font-medium transition-colors ${
               selected
-                ? "bg-[#d9d9d9] text-black"
-                : "bg-[var(--bg-card)] text-[var(--text-standard)] hover:bg-[#222]"
+                ? "bg-white text-black"
+                : "bg-[#2A2A2A] text-[var(--text-standard)] hover:bg-[#333]"
             }`}
           >
             {c.label}

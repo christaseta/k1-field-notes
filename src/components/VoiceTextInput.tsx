@@ -22,7 +22,7 @@ export function VoiceTextInput({
   value: controlled,
   onChange,
   placeholder,
-  rows = 5,
+  rows = 7,
   autoFocus,
 }: Props) {
   const { status, transcript, start, stop, supported, setTranscript } =
@@ -43,9 +43,9 @@ export function VoiceTextInput({
   const isListening = status === "listening";
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col h-full">
       {supported && (
-        <div className="flex items-center justify-center pt-2 pb-3">
+        <div className="my-auto flex flex-col items-center gap-3">
           <button
             type="button"
             onClick={isListening ? stop : start}
@@ -54,22 +54,19 @@ export function VoiceTextInput({
             className={`flex items-center justify-center rounded-full transition-all ${
               isListening
                 ? "w-20 h-20 bg-[#ff4d4d] text-white shadow-[0_0_0_8px_rgba(255,77,77,0.2)]"
-                : "w-20 h-20 bg-[var(--accent)] text-[var(--text-on-accent)] hover:bg-[var(--accent-strong)] active:scale-95"
+                : "w-20 h-20 bg-white text-black hover:bg-slate-100 active:scale-95"
             }`}
           >
             <Icon name="mic" size={32} />
           </button>
+          <p className="text-center text-[14px] text-[var(--text-subtle)]">
+            {isListening
+              ? "Listening… tap to stop"
+              : status === "error"
+                ? "Mic error — type below"
+                : "Tap to dictate, or type below"}
+          </p>
         </div>
-      )}
-
-      {supported && (
-        <p className="text-center text-[12px] text-[var(--text-subtle)]">
-          {isListening
-            ? "Listening… tap to stop"
-            : status === "error"
-              ? "Mic error — type below"
-              : "Tap to dictate, or type below"}
-        </p>
       )}
 
       <textarea
@@ -85,7 +82,7 @@ export function VoiceTextInput({
           onChange?.(next, "text");
         }}
         placeholder={placeholder}
-        className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--divider)] rounded-2xl text-[16px] text-[var(--text-standard)] placeholder:text-[var(--text-disabled)] focus:outline-none focus:border-[var(--accent)] resize-none"
+        className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--divider)] rounded-2xl text-[16px] text-[var(--text-standard)] placeholder:text-[var(--text-disabled)] focus:outline-none focus:border-[#595959] resize-none"
       />
       <input type="hidden" name={`${name}__method`} value={inputMethod} />
 
