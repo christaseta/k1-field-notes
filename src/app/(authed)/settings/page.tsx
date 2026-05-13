@@ -15,7 +15,7 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <TitleBar title="Settings" backHref="/home" />
+      <TitleBar backHref="/home" />
       <div className="max-w-md w-full mx-auto px-4 pt-6 space-y-6">
 
       <div className="bg-[var(--bg-card)] rounded-3xl p-6">
@@ -33,7 +33,7 @@ export default async function SettingsPage() {
         <form action={signOut}>
           <button
             type="submit"
-            className="w-full mt-2 py-3 rounded-2xl border border-[var(--divider)] text-[var(--text-standard)] font-medium hover:bg-[#222]"
+            className="w-full mt-2 min-h-[64px] px-6 rounded-full bg-[#2A2A2A] text-[var(--text-standard)] text-[16px] font-medium hover:bg-[#333]"
           >
             Sign out
           </button>

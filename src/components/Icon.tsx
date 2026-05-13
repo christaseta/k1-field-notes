@@ -8,6 +8,7 @@ export type IconName =
   | "gear"
   | "paper-pencil"
   | "arrow-clock"
+  | "arrow-left"
   | "check-fill";
 
 const SIZE_DEFAULT = 24;
