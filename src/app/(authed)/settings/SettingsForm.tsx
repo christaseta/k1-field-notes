@@ -44,43 +44,55 @@ export function SettingsForm({
         />
       </div>
 
-      <fieldset>
-        <legend className="block text-[14px] font-medium text-[var(--text-standard)] mb-2">
+      <div>
+        <label
+          htmlFor="weekly_day_pref"
+          className="block text-[14px] font-medium text-[var(--text-standard)] mb-2"
+        >
           Weekly check-in day
-        </legend>
+        </label>
         <p className="text-[12px] text-[var(--text-subtle)] mb-3">
           Pick the day you&apos;d like a reminder for the required weekly check-in.
         </p>
-        <div className="grid grid-cols-2 gap-2">
-          {DAYS.map((d) => {
-            const checked = String(weeklyDayPref ?? "") === d.value;
-            return (
-              <label
-                key={d.value}
-                className={`flex items-center justify-center px-3 py-3 rounded-2xl cursor-pointer text-[14px] transition-colors ${
-                  checked
-                    ? "bg-[var(--accent)] text-[var(--text-on-accent)] font-medium"
-                    : "bg-[#0e0e0e] border border-[var(--divider)] text-[var(--text-standard)] hover:bg-[#161616]"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="weekly_day_pref"
-                  value={d.value}
-                  defaultChecked={checked}
-                  className="sr-only"
-                />
+        <div className="relative">
+          <select
+            id="weekly_day_pref"
+            name="weekly_day_pref"
+            defaultValue={weeklyDayPref != null ? String(weeklyDayPref) : ""}
+            className="appearance-none w-full pl-6 pr-12 min-h-[64px] bg-[#2A2A2A] rounded-full text-[16px] text-[var(--text-standard)] focus:outline-none focus:bg-[#333]"
+          >
+            <option value="" disabled>
+              Choose a day
+            </option>
+            {DAYS.map((d) => (
+              <option key={d.value} value={d.value}>
                 {d.label}
-              </label>
-            );
-          })}
+              </option>
+            ))}
+          </select>
+          <svg
+            aria-hidden
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-[var(--text-strong)]"
+          >
+            <path
+              d="M5 7.5l5 5 5-5"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </div>
-      </fieldset>
+      </div>
 
       <button
         type="submit"
         disabled={pending}
-        className="w-full bg-[var(--accent)] text-[var(--text-on-accent)] py-4 rounded-2xl font-medium hover:bg-[var(--accent-strong)] disabled:opacity-60"
+        className="w-full bg-[var(--accent)] text-[var(--text-on-accent)] min-h-[64px] px-6 rounded-full text-[16px] font-medium hover:bg-[var(--accent-strong)] disabled:opacity-60"
       >
         {pending ? "Saving…" : "Save settings"}
       </button>

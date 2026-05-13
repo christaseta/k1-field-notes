@@ -104,7 +104,7 @@ export function VoicePromptHero() {
           onContextMenu={(e) => e.preventDefault()}
           className={`flex items-center justify-center w-12 h-12 rounded-full shrink-0 select-none transition-colors ${
             isActive
-              ? "bg-[#101010] text-white"
+              ? "bg-[#101010] text-white scale-95"
               : "bg-[#f0f0f0] text-[#101010] active:bg-white"
           }`}
         >
@@ -116,7 +116,7 @@ export function VoicePromptHero() {
         ) : (
           <Link
             href="/spontaneous"
-            className="flex-1 text-[16px] font-normal text-[#101010] leading-tight"
+            className="flex-1 text-[16px] font-medium text-[#101010] leading-tight"
           >
             {visStatus === "denied"
               ? "Mic blocked — tap to type instead"
@@ -133,15 +133,15 @@ export function VoicePromptHero() {
 function Waveform({ bars }: { bars: number[] }) {
   return (
     <div
-      className="flex-1 flex items-center justify-center gap-[3px] h-12"
+      className="w-[260px] flex items-center justify-center gap-[4px] h-12"
       aria-hidden
     >
       {bars.map((amp, i) => {
-        const h = Math.max(4, Math.round(amp * 36));
+        const h = Math.max(4, Math.round(amp * 44));
         return (
           <span
             key={i}
-            className="w-[3px] rounded-full bg-[#101010] transition-[height] duration-75"
+            className="w-[4px] rounded-full bg-[#101010] transition-[height] duration-75"
             style={{ height: `${h}px` }}
           />
         );
