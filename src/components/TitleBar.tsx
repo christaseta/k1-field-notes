@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Icon } from "./Icon";
 
 /**
  * Top bar inside the authed shell. Each page renders its own so the bar can
@@ -27,7 +28,7 @@ export function TitleBar({
               aria-label="Back"
               className="-ml-2 p-2 text-[var(--text-strong)] hover:text-white"
             >
-              <ChevronLeft />
+              <Icon name="arrow-left" size={24} />
             </Link>
           ) : null}
           {title ? (
@@ -46,23 +47,3 @@ export function TitleBar({
   );
 }
 
-function ChevronLeft() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden
-    >
-      <path
-        d="M12.5 4 6.5 10l6 6"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
