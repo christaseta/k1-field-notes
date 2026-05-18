@@ -6,6 +6,8 @@ import {
 } from "@/lib/questions";
 import { currentProgramWeek, programLabel, timeOfDayGreeting } from "@/lib/program";
 import { dailyStatus, weeklyStatus } from "@/lib/status";
+import Image from "next/image";
+import Link from "next/link";
 import { VoicePromptHero } from "@/components/VoicePromptHero";
 import { TitleBar } from "@/components/TitleBar";
 import { FeedbackCard } from "@/components/FeedbackCard";
@@ -59,6 +61,23 @@ export default async function HomePage() {
       <TitleBar />
       <div className="max-w-md w-full mx-auto px-4 pt-6 space-y-6">
         <section className="space-y-4">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[14px] text-[var(--text-subtle)] -tracking-[0.035px]">
+            {programLabel(now)}
+          </p>
+          <Link
+            href="/settings"
+            aria-label="Settings"
+            className="shrink-0"
+          >
+            <Image
+              src="/icons/ui/menu-dots.svg"
+              alt=""
+              width={36}
+              height={36}
+            />
+          </Link>
+        </div>
         <h1 className="text-[40px] leading-[42px] tracking-[-1px] text-[var(--text-standard)] font-normal">
           {firstName ? (
             <>
@@ -69,9 +88,6 @@ export default async function HomePage() {
             greeting
           )}
         </h1>
-        <p className="text-[14px] text-[var(--text-subtle)] -tracking-[0.035px]">
-          {programLabel(now)}
-        </p>
       </section>
 
       <div className="pt-4">

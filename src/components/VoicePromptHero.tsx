@@ -82,16 +82,8 @@ export function VoicePromptHero() {
   const isActive = visStatus === "active" || visStatus === "starting";
 
   return (
-    <div
-      className="relative overflow-hidden rounded-full"
-      style={{
-        backgroundImage: "url(/voice-promt.png)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      <div className="flex items-center gap-4 px-3 py-3 pr-6">
+    <div className="relative overflow-hidden rounded-full border border-[#959595] bg-black">
+      <div className="flex items-center gap-4 px-4 py-4">
         <button
           type="button"
           aria-label={isActive ? "Recording — release to stop" : "Hold to record"}
@@ -104,7 +96,7 @@ export function VoicePromptHero() {
           onContextMenu={(e) => e.preventDefault()}
           className={`flex items-center justify-center w-12 h-12 rounded-full shrink-0 select-none transition-colors ${
             isActive
-              ? "bg-[#101010] text-white scale-95"
+              ? "bg-white text-black scale-95"
               : "bg-[#f0f0f0] text-[#101010] active:bg-white"
           }`}
         >
@@ -116,7 +108,7 @@ export function VoicePromptHero() {
         ) : (
           <Link
             href="/spontaneous"
-            className="flex-1 text-[16px] font-medium text-[#101010] leading-tight"
+            className="flex-1 text-[16px] font-medium text-white leading-tight"
           >
             {visStatus === "denied"
               ? "Mic blocked — tap to type instead"
@@ -141,7 +133,7 @@ function Waveform({ bars }: { bars: number[] }) {
         return (
           <span
             key={i}
-            className="w-[4px] rounded-full bg-[#101010] transition-[height] duration-75"
+            className="w-[4px] rounded-full bg-white transition-[height] duration-75"
             style={{ height: `${h}px` }}
           />
         );
