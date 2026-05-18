@@ -90,7 +90,7 @@ export default async function HomePage() {
         </h1>
       </section>
 
-      <div className="pt-4">
+      <div className="pt-[100px]">
         <VoicePromptHero />
       </div>
 

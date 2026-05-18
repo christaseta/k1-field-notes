@@ -82,8 +82,22 @@ export function VoicePromptHero() {
   const isActive = visStatus === "active" || visStatus === "starting";
 
   return (
-    <div className="relative overflow-hidden rounded-full border border-[#959595] bg-black">
-      <div className="flex items-center gap-4 px-4 py-4">
+    <div className="relative overflow-hidden rounded-full border border-[#333333] bg-black">
+      <div className="flex items-center gap-4 pl-4 pr-2 py-2">
+        {isActive ? (
+          <Waveform bars={bars} />
+        ) : (
+          <Link
+            href="/spontaneous"
+            className="flex-1 text-[16px] font-medium text-white leading-tight"
+          >
+            {visStatus === "denied"
+              ? "Mic blocked — tap to type instead"
+              : visStatus === "error"
+                ? "Mic error — tap to type instead"
+                : "Record observations in real time"}
+          </Link>
+        )}
         <button
           type="button"
           aria-label={isActive ? "Recording — release to stop" : "Hold to record"}
@@ -102,21 +116,6 @@ export function VoicePromptHero() {
         >
           <Icon name="mic" size={20} />
         </button>
-
-        {isActive ? (
-          <Waveform bars={bars} />
-        ) : (
-          <Link
-            href="/spontaneous"
-            className="flex-1 text-[16px] font-medium text-white leading-tight"
-          >
-            {visStatus === "denied"
-              ? "Mic blocked — tap to type instead"
-              : visStatus === "error"
-                ? "Mic error — tap to type instead"
-                : "Record observations in real time"}
-          </Link>
-        )}
       </div>
     </div>
   );

@@ -18,7 +18,7 @@ export function FeedbackCard({
 }) {
   return (
     <div
-      className={`bg-[var(--bg-card)] rounded-3xl p-6 flex flex-col gap-6 ${
+      className={`bg-[var(--bg-card)] rounded-3xl px-4 py-6 flex flex-col gap-6 ${
         done ? "opacity-70" : "active:scale-[0.99] transition-transform"
       }`}
     >
