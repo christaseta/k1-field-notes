@@ -90,7 +90,7 @@ export default async function HomePage() {
         </h1>
       </section>
 
-      <div className="pt-[100px]">
+      <div className="pt-[100px] pb-2">
         <VoicePromptHero />
       </div>
 
@@ -98,7 +98,7 @@ export default async function HomePage() {
         Completed cards drop to the bottom so the next thing-to-do is always
         in the most reachable position.
       */}
-      <section className="flex flex-col gap-4">
+      <section className="flex flex-col gap-3">
         {[
           {
             key: "daily",

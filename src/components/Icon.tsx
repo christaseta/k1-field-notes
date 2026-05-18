@@ -9,6 +9,7 @@ export type IconName =
   | "paper-pencil"
   | "arrow-clock"
   | "arrow-left"
+  | "arrow-up"
   | "check-fill";
 
 const SIZE_DEFAULT = 24;

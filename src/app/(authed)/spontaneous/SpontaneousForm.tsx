@@ -1,19 +1,24 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { VoiceTextInput } from "@/components/VoiceTextInput";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { Icon } from "@/components/Icon";
+import { Sheet } from "@/components/Sheet";
 import { submitFeedback } from "@/app/actions/submit";
-import { SPONTANEOUS_TAGS } from "@/lib/tags";
 import { SPONTANEOUS_DRAFT_KEY } from "@/components/VoicePromptHero";
 
 export function SpontaneousForm() {
   const [note, setNote] = useState("");
   const [method, setMethod] = useState<"voice" | "text">("text");
-  const [tags, setTags] = useState<string[]>([]);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Pull a pre-recorded transcript handed off from the home-screen mic.
+  const { status, transcript, start, stop, supported, setTranscript } =
+    useSpeechRecognition();
+  const isListening = status === "listening";
+
   useEffect(() => {
     try {
       const draft = sessionStorage.getItem(SPONTANEOUS_DRAFT_KEY);
@@ -23,21 +28,23 @@ export function SpontaneousForm() {
       }
       sessionStorage.removeItem(SPONTANEOUS_DRAFT_KEY);
     } catch {
-      // sessionStorage may not be available (private mode); ignore.
+      // sessionStorage may be unavailable (private mode); ignore.
     }
   }, []);
 
-  const canSend = note.trim().length > 0;
+  // Mirror live transcript into the note while listening.
+  useEffect(() => {
+    if (isListening && transcript !== note) {
+      setMethod("voice");
+      setNote(transcript);
+    }
+  }, [transcript, isListening, note]);
 
-  const toggleTag = (tag: string) => {
-    setTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
-    );
-  };
+  const canSend = note.trim().length > 0 && !pending;
 
   const submit = () => {
     setError(null);
-    if (!canSend) {
+    if (!note.trim()) {
       setError("Add a note before sending.");
       return;
     }
@@ -47,7 +54,7 @@ export function SpontaneousForm() {
           kind: "spontaneous",
           note,
           noteInputMethod: method,
-          tags,
+          tags: [],
         });
       } catch (e) {
         setError(e instanceof Error ? e.message : "Something went wrong.");
@@ -56,66 +63,81 @@ export function SpontaneousForm() {
   };
 
   return (
-    <div className="space-y-6 pb-32">
-      <VoiceTextInput
-        value={note}
-        onChange={(value, m) => {
-          setNote(value);
-          setMethod(m);
-        }}
-        placeholder="What happened, who was involved, what did you notice?"
-        rows={6}
-        autoFocus
-      />
-
-      <div className="space-y-3">
-        <p className="text-[14px] text-[var(--text-subtle)]">
-          Tag this note (optional)
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {SPONTANEOUS_TAGS.map((tag) => {
-            const active = tags.includes(tag);
-            return (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => toggleTag(tag)}
-                aria-pressed={active}
-                className={`px-4 py-2 rounded-full text-[14px] font-medium transition-colors ${
-                  active
-                    ? "bg-[#d9d9d9] text-black"
-                    : "bg-[var(--bg-card)] text-[var(--text-standard)] hover:bg-[#222]"
-                }`}
-              >
-                {tag}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
+    <div className="pt-2 pb-6">
       {error && (
-        <p className="text-[13px] text-[#ff8b8b] text-center" role="alert">
+        <p className="text-[13px] text-[#ff8b8b] text-center mb-2" role="alert">
           {error}
         </p>
       )}
-
-      <div className="fixed bottom-16 inset-x-0 px-4 pb-2 pt-2 bg-[var(--bg-app)]">
-        <div className="max-w-md mx-auto">
+      <div className="bg-[var(--bg-card)] border border-[var(--divider)] rounded-3xl p-3 flex flex-col gap-3">
+        <textarea
+          ref={textareaRef}
+          value={note}
+          rows={2}
+          autoFocus
+          onChange={(e) => {
+            const next = e.target.value;
+            setMethod("text");
+            setTranscript(next);
+            setNote(next);
+          }}
+          placeholder="What happened? Who was there? What did you notice?"
+          className="w-full bg-transparent text-[16px] text-[var(--text-standard)] placeholder:text-[var(--text-disabled)] focus:outline-none resize-none px-2"
+        />
+        <div className="flex items-center justify-between">
           <button
             type="button"
-            onClick={submit}
-            disabled={!canSend || pending}
-            className={`w-full min-h-[48px] py-3 px-6 rounded-full text-[16px] font-medium transition-colors ${
-              canSend && !pending
-                ? "bg-white text-black hover:bg-slate-100"
-                : "bg-[#2a2a2a] text-[var(--text-disabled)] cursor-not-allowed"
-            }`}
+            aria-label="More options"
+            aria-haspopup="dialog"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen(true)}
+            className="flex items-center justify-center w-9 h-9 rounded-full border border-[var(--divider)] text-[var(--text-subtle)] hover:text-white"
           >
-            {pending ? "Sending…" : "Send"}
+            <span className="text-[20px] leading-none">+</span>
           </button>
+          <div className="flex items-center gap-2">
+            {supported && (
+              <button
+                type="button"
+                onClick={isListening ? stop : start}
+                aria-pressed={isListening}
+                aria-label={isListening ? "Stop dictating" : "Start dictating"}
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
+                  isListening
+                    ? "bg-[#ff8b8b] text-black"
+                    : "bg-white text-black hover:bg-slate-100"
+                }`}
+              >
+                <Icon name="mic" size={20} />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={submit}
+              disabled={!canSend}
+              aria-label="Send"
+              className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
+                canSend
+                  ? "bg-white text-black"
+                  : "bg-[#2a2a2a] text-[var(--text-disabled)] cursor-not-allowed"
+              }`}
+            >
+              <Icon name="arrow-up" size={20} />
+            </button>
+          </div>
         </div>
       </div>
+      <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} variant="compact">
+        <div className="px-4 pb-8 pt-2">
+          <button
+            type="button"
+            disabled
+            className="w-full text-left px-4 py-4 rounded-2xl text-[16px] text-[var(--text-disabled)] cursor-not-allowed"
+          >
+            Attach photo/video
+          </button>
+        </div>
+      </Sheet>
     </div>
   );
 }

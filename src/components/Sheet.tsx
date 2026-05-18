@@ -10,10 +10,13 @@ export function Sheet({
   open,
   onClose,
   children,
+  variant = "full",
 }: {
   open: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  /** "full" reserves the whole screen; "compact" hugs its content. */
+  variant?: "full" | "compact";
 }) {
   useEffect(() => {
     if (!open) return;
@@ -43,9 +46,9 @@ export function Sheet({
       <div
         role="dialog"
         aria-modal="true"
-        className={`absolute inset-x-0 bottom-0 top-8 bg-[#1A1A1A] rounded-t-3xl flex flex-col transition-transform duration-300 ease-out ${
-          open ? "translate-y-0" : "translate-y-full"
-        }`}
+        className={`absolute inset-x-0 bottom-0 bg-[#1A1A1A] rounded-t-3xl flex flex-col transition-transform duration-300 ease-out ${
+          variant === "full" ? "top-8" : ""
+        } ${open ? "translate-y-0" : "translate-y-full"}`}
       >
         <div className="flex justify-center pt-2 pb-1 shrink-0">
           <div className="w-10 h-1 rounded-full bg-white/20" />

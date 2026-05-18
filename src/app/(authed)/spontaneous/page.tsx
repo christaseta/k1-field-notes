@@ -3,19 +3,16 @@ import { TitleBar } from "@/components/TitleBar";
 
 export default function SpontaneousPage() {
   return (
-    <>
+    <div className="h-[100dvh] flex flex-col overflow-hidden">
       <TitleBar backHref="/home" />
-      <div className="max-w-md w-full mx-auto px-4 pt-6 space-y-6">
-        <div>
-          <h1 className="text-[28px] leading-[32px] -tracking-[0.5px] text-[var(--text-strong)] font-medium">
-            Review your note
+      <main className="flex-1 min-h-0 max-w-md w-full mx-auto px-4 flex flex-col">
+        <div className="flex-1 min-h-0 flex items-center justify-center">
+          <h1 className="text-center text-[32px] leading-[36px] -tracking-[0.5px] text-[var(--text-strong)] font-normal px-2">
+            See something at the kiosk? Just talk.
           </h1>
-          <p className="text-[14px] text-[var(--text-subtle)] mt-2">
-            Edit the transcript, add tags, then send when it&apos;s ready.
-          </p>
         </div>
         <SpontaneousForm />
-      </div>
-    </>
+      </main>
+    </div>
   );
 }
