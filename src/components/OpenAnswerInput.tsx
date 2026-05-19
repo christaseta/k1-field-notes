@@ -1,91 +1,61 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
-import { Icon } from "@/components/Icon";
-import { Sheet } from "@/components/Sheet";
-import { submitFeedback } from "@/app/actions/submit";
-import { SPONTANEOUS_DRAFT_KEY } from "@/components/VoicePromptHero";
+import { Icon } from "./Icon";
+import { Sheet } from "./Sheet";
 
-export function SpontaneousForm() {
-  const [note, setNote] = useState("");
-  const [method, setMethod] = useState<"voice" | "text">("text");
+type Props = {
+  value: string;
+  onChange: (value: string, inputMethod: "voice" | "text") => void;
+  onSubmit: () => void;
+  placeholder?: string;
+  pending?: boolean;
+  autoFocus?: boolean;
+};
+
+/**
+ * Bottom-anchored card with textarea + voice + send, mirroring the
+ * /spontaneous note entry. Used for "open" questions in the daily/weekly
+ * check-ins so the open-ended input feels like the same surface.
+ */
+export function OpenAnswerInput({
+  value,
+  onChange,
+  onSubmit,
+  placeholder,
+  pending,
+  autoFocus,
+}: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const router = useRouter();
 
   const { status, transcript, start, stop, supported, setTranscript } =
     useSpeechRecognition();
   const isListening = status === "listening";
 
   useEffect(() => {
-    try {
-      const draft = sessionStorage.getItem(SPONTANEOUS_DRAFT_KEY);
-      if (draft && draft.trim().length > 0) {
-        setNote(draft);
-        setMethod("voice");
-      }
-      sessionStorage.removeItem(SPONTANEOUS_DRAFT_KEY);
-    } catch {
-      // sessionStorage may be unavailable (private mode); ignore.
+    if (isListening && transcript !== value) {
+      onChange(transcript, "voice");
     }
-  }, []);
+  }, [transcript, isListening, value, onChange]);
 
-  // Mirror live transcript into the note while listening.
-  useEffect(() => {
-    if (isListening && transcript !== note) {
-      setMethod("voice");
-      setNote(transcript);
-    }
-  }, [transcript, isListening, note]);
-
-  const canSend = note.trim().length > 0 && !pending;
-
-  const submit = () => {
-    setError(null);
-    if (isListening) stop();
-    if (!note.trim()) {
-      setError("Add a note before sending.");
-      return;
-    }
-    startTransition(async () => {
-      try {
-        await submitFeedback({
-          kind: "spontaneous",
-          note,
-          noteInputMethod: method,
-          tags: [],
-        });
-        router.push("/thanks");
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Something went wrong.");
-      }
-    });
-  };
+  const canSend = value.trim().length > 0 && !pending;
 
   return (
-    <div className="pt-2 pb-6">
-      {error && (
-        <p className="text-[13px] text-[#ff8b8b] text-center mb-2" role="alert">
-          {error}
-        </p>
-      )}
+    <>
       <div className="bg-[var(--bg-card)] rounded-3xl p-3 flex flex-col gap-[44px]">
         <textarea
           ref={textareaRef}
-          value={note}
+          value={value}
           rows={2}
-          autoFocus
+          autoFocus={autoFocus}
           onChange={(e) => {
             const next = e.target.value;
-            setMethod("text");
             setTranscript(next);
-            setNote(next);
+            onChange(next, "text");
           }}
-          placeholder="What happened? Who was there? What did you notice?"
+          placeholder={placeholder}
           className="w-full bg-transparent text-[16px] text-[var(--text-standard)] placeholder:text-[var(--text-disabled)] focus:outline-none resize-none px-2"
         />
         <div className="flex items-center justify-between">
@@ -117,7 +87,7 @@ export function SpontaneousForm() {
             )}
             <button
               type="button"
-              onClick={submit}
+              onClick={onSubmit}
               disabled={!canSend}
               aria-label="Send"
               className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
@@ -142,6 +112,6 @@ export function SpontaneousForm() {
           </button>
         </div>
       </Sheet>
-    </div>
+    </>
   );
 }

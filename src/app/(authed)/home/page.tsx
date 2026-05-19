@@ -57,7 +57,15 @@ export default async function HomePage() {
   const week = currentProgramWeek(now);
 
   return (
-    <>
+    <div
+      className="min-h-[100dvh]"
+      style={{
+        backgroundImage: "url(/dot-bg.png)",
+        backgroundSize: "100% auto",
+        backgroundPosition: "top",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
       <TitleBar />
       <div className="max-w-md w-full mx-auto px-4 pt-6 space-y-6">
         <section className="space-y-4">
@@ -139,7 +147,7 @@ export default async function HomePage() {
           ))}
         </section>
       </div>
-    </>
+    </div>
   );
 }
 

@@ -42,7 +42,7 @@ export function SignInForm({ next }: { next: string }) {
 
       {state && (
         <p
-          className={`text-[13px] ${state.ok ? "text-[var(--pill-complete-fg)]" : "text-[#ff8b8b]"}`}
+          className={`text-[13px] ${state.ok ? "text-[#00B23B]" : "text-[#ff8b8b]"}`}
           role={state.ok ? "status" : "alert"}
         >
           {state.message}
@@ -53,7 +53,7 @@ export function SignInForm({ next }: { next: string }) {
         <button
           type="submit"
           disabled={!canSubmit}
-          className={`w-full min-h-[48px] px-5 py-3 rounded-full text-[16px] font-medium transition-colors bg-[#f0f0f0] ${
+          className={`w-full min-h-[64px] px-6 rounded-full text-[16px] font-medium transition-colors bg-[#f0f0f0] ${
             canSubmit
               ? "text-[#101010] hover:bg-white"
               : "text-[#959595] cursor-not-allowed"
