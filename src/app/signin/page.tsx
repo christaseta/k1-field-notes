@@ -15,7 +15,7 @@ export default async function SignInPage(props: {
   if (user) redirect(next ?? "/home");
 
   return (
-    <main className="min-h-[100dvh] bg-[var(--bg-app)] text-[var(--text-standard)] flex flex-col px-8 pt-12 pb-8">
+    <main className="min-h-[100dvh] bg-[var(--bg-app)] text-[var(--text-standard)] flex flex-col px-8 pt-[148px] pb-8">
       <div className="max-w-md w-full mx-auto flex flex-col flex-1 gap-10">
         <div className="flex flex-col gap-6">
           <Image

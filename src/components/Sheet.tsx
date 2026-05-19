@@ -46,9 +46,14 @@ export function Sheet({
       <div
         role="dialog"
         aria-modal="true"
+        style={
+          variant === "full"
+            ? { top: "calc(env(safe-area-inset-top) + 8px)" }
+            : undefined
+        }
         className={`absolute inset-x-0 bottom-0 bg-[#1A1A1A] rounded-t-3xl flex flex-col transition-transform duration-300 ease-out ${
-          variant === "full" ? "top-8" : ""
-        } ${open ? "translate-y-0" : "translate-y-full"}`}
+          open ? "translate-y-0" : "translate-y-full"
+        }`}
       >
         <div className="flex justify-center pt-2 pb-1 shrink-0">
           <div className="w-10 h-1 rounded-full bg-white/20" />
