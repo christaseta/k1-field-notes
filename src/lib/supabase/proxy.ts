@@ -6,6 +6,22 @@ const PUBLIC_PATHS = ["/signin", "/auth/callback", "/auth/error"];
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
+  // Demo-mode bypass: set via ?demo=true, persisted as a cookie. Skips
+  // the Supabase auth gate so reviewers can browse without sign-in.
+  const demoParam = request.nextUrl.searchParams.get("demo");
+  if (demoParam === "true") {
+    response.cookies.set("demo", "true", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 365,
+    });
+    return response;
+  }
+  if (request.cookies.get("demo")?.value === "true") {
+    return response;
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

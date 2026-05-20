@@ -18,22 +18,22 @@ export function FeedbackCard({
 }) {
   return (
     <div
-      className={`bg-[var(--bg-card)] rounded-3xl px-4 py-6 min-h-[154px] flex flex-col gap-6 ${
+      className={`bg-[#0F0F0F] rounded-3xl p-6 min-h-[172px] flex flex-col gap-6 ${
         done ? "opacity-70" : "active:scale-[0.99] transition-transform"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
-        <p className="text-[14px] font-medium text-[var(--text-standard)] leading-5">
+        <p className="text-[16px] font-medium text-[var(--text-standard)] leading-5">
           {label} <span className="text-[var(--text-strong)]">·</span>{" "}
           <span>{modifier}</span>
         </p>
         <StatusPill pill={pill} />
       </div>
-      <div className="space-y-2">
+      <div className="space-y-2 mt-auto">
         <h2 className="text-[24px] leading-[24px] -tracking-[0.18px] font-medium text-[var(--text-strong)]">
           {title}
         </h2>
-        <p className="text-[14px] text-[var(--text-subtle)] -tracking-[0.035px]">
+        <p className="text-[16px] text-[var(--text-subtle)] -tracking-[0.035px]">
           {subtitle}
         </p>
       </div>
