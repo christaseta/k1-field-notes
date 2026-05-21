@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { Icon } from "@/components/Icon";
-import { Sheet } from "@/components/Sheet";
 import { submitFeedback } from "@/app/actions/submit";
 import { SPONTANEOUS_DRAFT_KEY } from "@/components/VoicePromptHero";
 
@@ -15,7 +14,24 @@ export function SpontaneousForm() {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function onDocClick(e: MouseEvent) {
+      if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
 
   const { status, transcript, start, stop, supported, setTranscript } =
     useSpeechRecognition();
@@ -89,16 +105,33 @@ export function SpontaneousForm() {
           className="w-full bg-transparent text-[16px] text-[var(--text-standard)] placeholder:text-[var(--text-disabled)] focus:outline-none resize-none px-2"
         />
         <div className="flex items-center justify-between">
-          <button
-            type="button"
-            aria-label="More options"
-            aria-haspopup="dialog"
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen(true)}
-            className="flex items-center justify-center w-9 h-9 rounded-full border border-[var(--divider)] text-[var(--text-subtle)] hover:text-white"
-          >
-            <span className="text-[20px] leading-none">+</span>
-          </button>
+          <div className="relative" ref={menuRef}>
+            {menuOpen && (
+              <div
+                role="menu"
+                className="absolute bottom-full left-0 mb-2 min-w-[200px] p-1 bg-[#2A2A2A] rounded-2xl shadow-lg"
+              >
+                <button
+                  type="button"
+                  role="menuitem"
+                  disabled
+                  className="w-full text-left px-3 py-2 rounded-xl text-[14px] text-white cursor-not-allowed whitespace-nowrap"
+                >
+                  Attach photo/video
+                </button>
+              </div>
+            )}
+            <button
+              type="button"
+              aria-label="More options"
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((o) => !o)}
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-[#2a2a2a] text-white"
+            >
+              <span className="text-[20px] leading-none">+</span>
+            </button>
+          </div>
           <div className="flex items-center gap-2">
             {supported && (
               <button
@@ -131,17 +164,6 @@ export function SpontaneousForm() {
           </div>
         </div>
       </div>
-      <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} variant="compact">
-        <div className="px-4 pb-8 pt-2">
-          <button
-            type="button"
-            disabled
-            className="w-full text-left px-4 py-4 rounded-2xl text-[16px] text-[var(--text-disabled)] cursor-not-allowed"
-          >
-            Attach photo/video
-          </button>
-        </div>
-      </Sheet>
     </div>
   );
 }

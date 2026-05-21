@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { Icon } from "./Icon";
-import { Sheet } from "./Sheet";
 
 type Props = {
   value: string;
@@ -29,6 +28,7 @@ export function OpenAnswerInput({
 }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const { status, transcript, start, stop, supported, setTranscript } =
     useSpeechRecognition();
@@ -40,78 +40,98 @@ export function OpenAnswerInput({
     }
   }, [transcript, isListening, value, onChange]);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    function onDocClick(e: MouseEvent) {
+      if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+
   const canSend = value.trim().length > 0 && !pending;
 
   return (
-    <>
-      <div className="bg-[var(--bg-card)] rounded-3xl p-3 flex flex-col gap-[44px]">
-        <textarea
-          ref={textareaRef}
-          value={value}
-          rows={2}
-          autoFocus={autoFocus}
-          onChange={(e) => {
-            const next = e.target.value;
-            setTranscript(next);
-            onChange(next, "text");
-          }}
-          placeholder={placeholder}
-          className="w-full bg-transparent text-[16px] text-[var(--text-standard)] placeholder:text-[var(--text-disabled)] focus:outline-none resize-none px-2"
-        />
-        <div className="flex items-center justify-between">
+    <div className="bg-[var(--bg-card)] rounded-3xl p-3 flex flex-col gap-[44px]">
+      <textarea
+        ref={textareaRef}
+        value={value}
+        rows={2}
+        autoFocus={autoFocus}
+        onChange={(e) => {
+          const next = e.target.value;
+          setTranscript(next);
+          onChange(next, "text");
+        }}
+        placeholder={placeholder}
+        className="w-full bg-transparent text-[16px] text-[var(--text-standard)] placeholder:text-[var(--text-disabled)] focus:outline-none resize-none px-2"
+      />
+      <div className="flex items-center justify-between">
+        <div className="relative" ref={menuRef}>
+          {menuOpen && (
+            <div
+              role="menu"
+              className="absolute bottom-full left-0 mb-2 min-w-[200px] p-1 bg-[#2A2A2A] rounded-2xl shadow-lg"
+            >
+              <button
+                type="button"
+                role="menuitem"
+                disabled
+                className="w-full text-left px-3 py-2 rounded-xl text-[14px] text-white cursor-not-allowed whitespace-nowrap"
+              >
+                Attach photo/video
+              </button>
+            </div>
+          )}
           <button
             type="button"
             aria-label="More options"
-            aria-haspopup="dialog"
+            aria-haspopup="menu"
             aria-expanded={menuOpen}
-            onClick={() => setMenuOpen(true)}
-            className="flex items-center justify-center w-9 h-9 rounded-full border border-[var(--divider)] text-[var(--text-subtle)] hover:text-white"
+            onClick={() => setMenuOpen((o) => !o)}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-[#2a2a2a] text-white"
           >
             <span className="text-[20px] leading-none">+</span>
           </button>
-          <div className="flex items-center gap-2">
-            {supported && (
-              <button
-                type="button"
-                onClick={isListening ? stop : start}
-                aria-pressed={isListening}
-                aria-label={isListening ? "Stop dictating" : "Start dictating"}
-                className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
-                  isListening
-                    ? "bg-black text-white"
-                    : "bg-white text-black hover:bg-slate-100"
-                }`}
-              >
-                <Icon name="mic" size={20} />
-              </button>
-            )}
+        </div>
+        <div className="flex items-center gap-2">
+          {supported && (
             <button
               type="button"
-              onClick={onSubmit}
-              disabled={!canSend}
-              aria-label="Send"
+              onClick={isListening ? stop : start}
+              aria-pressed={isListening}
+              aria-label={isListening ? "Stop dictating" : "Start dictating"}
               className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
-                canSend
-                  ? "bg-white text-black"
-                  : "bg-[#2a2a2a] text-[var(--text-disabled)] cursor-not-allowed"
+                isListening
+                  ? "bg-black text-white"
+                  : "bg-white text-black hover:bg-slate-100"
               }`}
             >
-              <Icon name="arrow-up" size={32} />
+              <Icon name="mic" size={20} />
             </button>
-          </div>
-        </div>
-      </div>
-      <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} variant="compact">
-        <div className="px-4 pb-8 pt-2">
+          )}
           <button
             type="button"
-            disabled
-            className="w-full text-left px-4 py-4 rounded-2xl text-[16px] text-[var(--text-disabled)] cursor-not-allowed"
+            onClick={onSubmit}
+            disabled={!canSend}
+            aria-label="Send"
+            className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
+              canSend
+                ? "bg-white text-black"
+                : "bg-[#2a2a2a] text-[var(--text-disabled)] cursor-not-allowed"
+            }`}
           >
-            Attach photo/video
+            <Icon name="arrow-up" size={32} />
           </button>
         </div>
-      </Sheet>
-    </>
+      </div>
+    </div>
   );
 }
