@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { Icon } from "@/components/Icon";
+import { AttachmentTray, useAttachments } from "@/components/AttachmentTray";
 import { submitFeedback } from "@/app/actions/submit";
 import { SPONTANEOUS_DRAFT_KEY } from "@/components/VoicePromptHero";
 
@@ -15,7 +16,11 @@ export function SpontaneousForm() {
   const [pending, startTransition] = useTransition();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const libraryInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  const { attachments, add, remove, atCap } = useAttachments();
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -58,7 +63,8 @@ export function SpontaneousForm() {
     }
   }, [transcript, isListening, note]);
 
-  const canSend = note.trim().length > 0 && !pending;
+  const canSend =
+    (note.trim().length > 0 || attachments.length > 0) && !pending;
 
   const submit = () => {
     setError(null);
@@ -89,8 +95,10 @@ export function SpontaneousForm() {
           {error}
         </p>
       )}
-      <div className="bg-[var(--bg-card)] rounded-3xl p-3 flex flex-col gap-[44px]">
-        <textarea
+      <div className="bg-[var(--bg-card)] rounded-3xl p-3 flex flex-col gap-[56px]">
+        <div className="flex flex-col gap-3">
+          <AttachmentTray attachments={attachments} onRemove={remove} />
+          <textarea
           ref={textareaRef}
           value={note}
           rows={2}
@@ -104,20 +112,37 @@ export function SpontaneousForm() {
           placeholder="What happened? Who was there? What did you notice?"
           className="w-full bg-transparent text-[16px] text-[var(--text-standard)] placeholder:text-[var(--text-disabled)] focus:outline-none resize-none px-2"
         />
+        </div>
         <div className="flex items-center justify-between">
           <div className="relative" ref={menuRef}>
             {menuOpen && (
               <div
                 role="menu"
-                className="absolute bottom-full left-0 mb-2 min-w-[200px] p-1 bg-[#2A2A2A] rounded-2xl shadow-lg"
+                className="absolute bottom-full left-0 mb-2 min-w-[220px] p-1 bg-[#2A2A2A] rounded-2xl shadow-lg"
               >
                 <button
                   type="button"
                   role="menuitem"
-                  disabled
-                  className="w-full text-left px-3 py-2 rounded-xl text-[14px] text-white cursor-not-allowed whitespace-nowrap"
+                  disabled={atCap}
+                  onClick={() => {
+                    cameraInputRef.current?.click();
+                    setMenuOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-xl text-[14px] text-white hover:bg-[#333] disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
                 >
-                  Attach photo/video
+                  Take photo or video
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  disabled={atCap}
+                  onClick={() => {
+                    libraryInputRef.current?.click();
+                    setMenuOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-xl text-[14px] text-white hover:bg-[#333] disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  Choose from library
                 </button>
               </div>
             )}
@@ -131,6 +156,28 @@ export function SpontaneousForm() {
             >
               <span className="text-[20px] leading-none">+</span>
             </button>
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*,video/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => {
+                add(e.target.files);
+                e.target.value = "";
+              }}
+            />
+            <input
+              ref={libraryInputRef}
+              type="file"
+              accept="image/*,video/*"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                add(e.target.files);
+                e.target.value = "";
+              }}
+            />
           </div>
           <div className="flex items-center gap-2">
             {supported && (
