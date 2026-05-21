@@ -17,9 +17,14 @@ export default function SpontaneousPage() {
   const handleBack = () => {
     if (leaving) return;
     setLeaving(true);
-    // Animation: 240ms ease-out. Kick navigation just before the animation
-    // ends so the new page is rendered the moment the slide completes.
-    setTimeout(() => router.push("/home"), 180);
+    // Animation: 240ms ease-out. Fire router.back() so we pop history and
+    // reuse the cached RSC for /home instead of re-fetching it. We trigger
+    // it just before the slide finishes so the new view is ready right as
+    // the animation ends.
+    setTimeout(() => {
+      if (window.history.length > 1) router.back();
+      else router.push("/home");
+    }, 180);
   };
 
   return (

@@ -74,13 +74,13 @@ export default async function HomePage() {
       }}
     >
       <TitleBar />
-      <div className="flex-1 max-w-md w-full mx-auto px-4 pt-6 pb-8 flex flex-col">
+      <div className="flex-1 max-w-md w-full mx-auto px-4 pt-6 pb-8 flex flex-col animate-fade-in">
         <section>
         <div className="flex justify-end">
           <Link
             href="/settings"
             aria-label="Settings"
-            className="shrink-0"
+            className="shrink-0 transition-all duration-150 ease-out hover:opacity-80 active:scale-90 active:opacity-60"
           >
             <Image
               src="/icons/ui/settings.svg"

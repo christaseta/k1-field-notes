@@ -47,7 +47,7 @@ export function VoicePromptHero() {
         Record observations...
       </span>
       <span className="flex items-center justify-center w-12 h-12 rounded-full shrink-0 bg-[#f0f0f0] text-[#101010]">
-        <Icon name="arrow-up" size={32} />
+        <Icon name="send" size={24} />
       </span>
     </a>
   );
