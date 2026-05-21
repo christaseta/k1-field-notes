@@ -15,7 +15,7 @@ type Props = {
 export function MultipleChoiceQuestion({ choices, value, onChange }: Props) {
   return (
     <div
-      className="space-y-3"
+      className="space-y-1"
       role="radiogroup"
     >
       {choices.map((c) => {
@@ -30,7 +30,7 @@ export function MultipleChoiceQuestion({ choices, value, onChange }: Props) {
             className={`w-full text-left px-6 min-h-[64px] rounded-full text-[16px] font-medium transition-colors ${
               selected
                 ? "bg-white text-black"
-                : "bg-[#2A2A2A] text-[var(--text-standard)] hover:bg-[#333]"
+                : "bg-[#1A1A1A] text-[var(--text-standard)] hover:bg-[#222]"
             }`}
           >
             {c.label}

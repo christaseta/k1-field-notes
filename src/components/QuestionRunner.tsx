@@ -179,7 +179,7 @@ export function QuestionRunner({ set, kind, variant = "page", onClose }: Props) 
           <div className="flex-1 min-h-0 overflow-y-auto px-4 flex items-center justify-center animate-fade-in">
             {thanksBody}
           </div>
-          <div className="px-4 pb-4 pt-2 shrink-0 bg-[#1A1A1A]">{doneButton}</div>
+          <div className="px-4 pb-4 pt-2 shrink-0 bg-[#141414]">{doneButton}</div>
         </>
       );
     }
@@ -238,7 +238,7 @@ export function QuestionRunner({ set, kind, variant = "page", onClose }: Props) 
             <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-10 pb-4 flex flex-col">
               {questionBody}
             </div>
-            <div className="px-4 pb-4 pt-0 shrink-0 bg-[#1A1A1A]">
+            <div className="px-4 pb-4 pt-0 shrink-0 bg-[#141414]">
               {submitButton}
             </div>
           </>
