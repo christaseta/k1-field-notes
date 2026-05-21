@@ -1,19 +1,47 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { VoiceTextInput } from "@/components/VoiceTextInput";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { Icon } from "@/components/Icon";
+import { AttachmentTray, useAttachments } from "@/components/AttachmentTray";
 import { submitFeedback } from "@/app/actions/submit";
-import { SPONTANEOUS_TAGS } from "@/lib/tags";
 import { SPONTANEOUS_DRAFT_KEY } from "@/components/VoicePromptHero";
 
 export function SpontaneousForm() {
   const [note, setNote] = useState("");
   const [method, setMethod] = useState<"voice" | "text">("text");
-  const [tags, setTags] = useState<string[]>([]);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const libraryInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
-  // Pull a pre-recorded transcript handed off from the home-screen mic.
+  const { attachments, add, remove, atCap } = useAttachments();
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function onDocClick(e: MouseEvent) {
+      if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+
+  const { status, transcript, start, stop, supported, setTranscript } =
+    useSpeechRecognition();
+  const isListening = status === "listening";
+
   useEffect(() => {
     try {
       const draft = sessionStorage.getItem(SPONTANEOUS_DRAFT_KEY);
@@ -23,21 +51,25 @@ export function SpontaneousForm() {
       }
       sessionStorage.removeItem(SPONTANEOUS_DRAFT_KEY);
     } catch {
-      // sessionStorage may not be available (private mode); ignore.
+      // sessionStorage may be unavailable (private mode); ignore.
     }
   }, []);
 
-  const canSend = note.trim().length > 0;
+  // Mirror live transcript into the note while listening.
+  useEffect(() => {
+    if (isListening && transcript !== note) {
+      setMethod("voice");
+      setNote(transcript);
+    }
+  }, [transcript, isListening, note]);
 
-  const toggleTag = (tag: string) => {
-    setTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
-    );
-  };
+  const canSend =
+    (note.trim().length > 0 || attachments.length > 0) && !pending;
 
   const submit = () => {
     setError(null);
-    if (!canSend) {
+    if (isListening) stop();
+    if (!note.trim()) {
       setError("Add a note before sending.");
       return;
     }
@@ -47,8 +79,9 @@ export function SpontaneousForm() {
           kind: "spontaneous",
           note,
           noteInputMethod: method,
-          tags,
+          tags: [],
         });
+        router.push("/thanks");
       } catch (e) {
         setError(e instanceof Error ? e.message : "Something went wrong.");
       }
@@ -56,64 +89,126 @@ export function SpontaneousForm() {
   };
 
   return (
-    <div className="space-y-6 pb-32">
-      <VoiceTextInput
-        value={note}
-        onChange={(value, m) => {
-          setNote(value);
-          setMethod(m);
-        }}
-        placeholder="What happened, who was involved, what did you notice?"
-        rows={6}
-        autoFocus
-      />
-
-      <div className="space-y-3">
-        <p className="text-[14px] text-[var(--text-subtle)]">
-          Tag this note (optional)
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {SPONTANEOUS_TAGS.map((tag) => {
-            const active = tags.includes(tag);
-            return (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => toggleTag(tag)}
-                aria-pressed={active}
-                className={`px-4 py-2 rounded-full text-[14px] font-medium transition-colors ${
-                  active
-                    ? "bg-[#d9d9d9] text-black"
-                    : "bg-[var(--bg-card)] text-[var(--text-standard)] hover:bg-[#222]"
-                }`}
-              >
-                {tag}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
+    <div className="pt-2 pb-6">
       {error && (
-        <p className="text-[13px] text-[#ff8b8b] text-center" role="alert">
+        <p className="text-[13px] text-[#ff8b8b] text-center mb-2" role="alert">
           {error}
         </p>
       )}
-
-      <div className="fixed bottom-16 inset-x-0 px-4 pb-2 pt-2 bg-[var(--bg-app)]">
-        <div className="max-w-md mx-auto">
-          <button
-            type="button"
-            onClick={submit}
-            disabled={!canSend || pending}
-            className={`w-full min-h-[48px] py-3 px-6 rounded-full text-[16px] font-medium transition-colors ${
-              canSend && !pending
-                ? "bg-white text-black hover:bg-slate-100"
-                : "bg-[#2a2a2a] text-[var(--text-disabled)] cursor-not-allowed"
-            }`}
-          >
-            {pending ? "Sending…" : "Send"}
-          </button>
+      <div className="bg-[var(--bg-card)] rounded-3xl p-3 flex flex-col gap-[56px]">
+        <div className="flex flex-col gap-3">
+          <AttachmentTray attachments={attachments} onRemove={remove} />
+          <textarea
+          ref={textareaRef}
+          value={note}
+          rows={2}
+          autoFocus
+          onChange={(e) => {
+            const next = e.target.value;
+            setMethod("text");
+            setTranscript(next);
+            setNote(next);
+          }}
+          placeholder="What happened? Who was there? What did you notice?"
+          className="w-full bg-transparent text-[16px] text-[var(--text-standard)] placeholder:text-[var(--text-disabled)] focus:outline-none resize-none px-2"
+        />
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="relative" ref={menuRef}>
+            {menuOpen && (
+              <div
+                role="menu"
+                className="absolute bottom-full left-0 mb-2 min-w-[220px] p-1 bg-[#2A2A2A] rounded-2xl shadow-lg"
+              >
+                <button
+                  type="button"
+                  role="menuitem"
+                  disabled={atCap}
+                  onClick={() => {
+                    cameraInputRef.current?.click();
+                    setMenuOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-xl text-[14px] text-white hover:bg-[#333] disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  Take photo or video
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  disabled={atCap}
+                  onClick={() => {
+                    libraryInputRef.current?.click();
+                    setMenuOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-xl text-[14px] text-white hover:bg-[#333] disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  Choose from library
+                </button>
+              </div>
+            )}
+            <button
+              type="button"
+              aria-label="More options"
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((o) => !o)}
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-[#2a2a2a] text-white"
+            >
+              <span className="text-[20px] leading-none">+</span>
+            </button>
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*,video/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => {
+                add(e.target.files);
+                e.target.value = "";
+              }}
+            />
+            <input
+              ref={libraryInputRef}
+              type="file"
+              accept="image/*,video/*"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                add(e.target.files);
+                e.target.value = "";
+              }}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            {supported && (
+              <button
+                type="button"
+                onClick={isListening ? stop : start}
+                aria-pressed={isListening}
+                aria-label={isListening ? "Stop dictating" : "Start dictating"}
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
+                  isListening
+                    ? "bg-black text-white"
+                    : "bg-white text-black hover:bg-slate-100"
+                }`}
+              >
+                <Icon name="mic" size={20} />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={submit}
+              disabled={!canSend}
+              aria-label="Send"
+              className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
+                canSend
+                  ? "bg-white text-black"
+                  : "bg-[#2a2a2a] text-[var(--text-disabled)] cursor-not-allowed"
+              }`}
+            >
+              <Icon name="arrow-up" size={32} />
+            </button>
+          </div>
         </div>
       </div>
     </div>

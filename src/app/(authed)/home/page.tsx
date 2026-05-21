@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import {
   currentWeeklySet,
@@ -14,6 +15,9 @@ import { FeedbackCard } from "@/components/FeedbackCard";
 import { FeedbackCardSheet } from "@/components/FeedbackCardSheet";
 
 export default async function HomePage() {
+  const cookieStore = await cookies();
+  const isDemo = cookieStore.get("demo")?.value === "true";
+  
   const supabase = await createClient();
   const now = new Date();
 
@@ -21,6 +25,9 @@ export default async function HomePage() {
     .from("sellers")
     .select("display_name, weekly_day_pref")
     .single();
+  
+  // Use demo name if in demo mode and no seller data
+  const displayName = seller?.display_name || (isDemo ? "Amanda" : "");
 
   const weekly = currentWeeklySet();
 
@@ -53,32 +60,37 @@ export default async function HomePage() {
   );
 
   const greeting = timeOfDayGreeting(now);
-  const firstName = (seller?.display_name ?? "").split(" ")[0]?.trim() ?? "";
+  const firstName = displayName.split(" ")[0]?.trim() ?? "";
   const week = currentProgramWeek(now);
 
   return (
-    <>
+    <div
+      className="min-h-[100dvh] flex flex-col"
+      style={{
+        backgroundImage: "url(/dot-bg.png)",
+        backgroundSize: "100% auto",
+        backgroundPosition: "top",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
       <TitleBar />
-      <div className="max-w-md w-full mx-auto px-4 pt-6 space-y-6">
-        <section className="space-y-4">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-[14px] text-[var(--text-subtle)] -tracking-[0.035px]">
-            {programLabel(now)}
-          </p>
+      <div className="flex-1 max-w-md w-full mx-auto px-4 pt-6 pb-8 flex flex-col animate-fade-in">
+        <section>
+        <div className="flex justify-end">
           <Link
             href="/settings"
             aria-label="Settings"
-            className="shrink-0"
+            className="shrink-0 transition-all duration-150 ease-out hover:opacity-80 active:scale-90 active:opacity-60"
           >
             <Image
-              src="/icons/ui/menu-dots.svg"
+              src="/icons/ui/settings.svg"
               alt=""
-              width={36}
-              height={36}
+              width={40}
+              height={40}
             />
           </Link>
         </div>
-        <h1 className="text-[40px] leading-[42px] tracking-[-1px] text-[var(--text-standard)] font-normal">
+        <h1 className="mt-12 text-[40px] leading-[42px] tracking-[-1px] text-[var(--text-standard)] font-normal">
           {firstName ? (
             <>
               {greeting},<br />
@@ -88,17 +100,16 @@ export default async function HomePage() {
             greeting
           )}
         </h1>
+        <p className="mt-4 text-[16px] font-medium text-white -tracking-[0.035px]">
+          {programLabel(now)}
+        </p>
       </section>
-
-      <div className="pt-4">
-        <VoicePromptHero />
-      </div>
 
       {/*
         Completed cards drop to the bottom so the next thing-to-do is always
         in the most reachable position.
       */}
-      <section className="flex flex-col gap-4">
+      <section className="flex flex-col gap-1 my-auto -mx-2">
         {[
           {
             key: "daily",
@@ -138,8 +149,12 @@ export default async function HomePage() {
             <div key={key}>{card}</div>
           ))}
         </section>
+
+        <div>
+          <VoicePromptHero />
+        </div>
       </div>
-    </>
+    </div>
   );
 }
 

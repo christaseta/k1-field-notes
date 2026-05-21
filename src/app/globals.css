@@ -43,6 +43,13 @@
   font-style: italic;
   font-display: swap;
 }
+@font-face {
+  font-family: "Cash Sans Mono";
+  src: url("/fonts/CashSansMono-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* ─── Design tokens ───────────────────────────────────────────────────────── */
 :root {
@@ -144,3 +151,22 @@ body {
 .animate-fade-in {
   animation: fade-in 260ms ease-out both;
 }
+
+@keyframes word-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-word-reveal {
+  animation-name: word-reveal;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: both;
+}
+
+
+

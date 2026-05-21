@@ -1,5 +1,6 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import {
   dailyQuestionSet,
@@ -22,6 +23,14 @@ type SubmitInput = {
 };
 
 export async function submitFeedback(input: SubmitInput) {
+  const cookieStore = await cookies();
+  const isDemo = cookieStore.get("demo")?.value === "true";
+  
+  // In demo mode, skip the actual submission but return success
+  if (isDemo) {
+    return;
+  }
+  
   const supabase = await createClient();
   const {
     data: { user },

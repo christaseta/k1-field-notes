@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Question, QuestionSet } from "@/lib/questions";
 import type { FeedbackKind } from "@/lib/db-types";
-import { VoiceTextInput } from "./VoiceTextInput";
+import { OpenAnswerInput } from "./OpenAnswerInput";
 import { MultipleChoiceQuestion } from "./MultipleChoiceQuestion";
 import { TitleBar } from "./TitleBar";
 import { SegmentedProgress } from "./SegmentedProgress";
@@ -89,7 +89,7 @@ export function QuestionRunner({ set, kind, variant = "page", onClose }: Props) 
       className={`w-full min-h-[64px] py-3 px-6 rounded-full text-[16px] font-medium transition-colors ${
         canAdvance && !pending
           ? "bg-white text-black hover:bg-slate-100"
-          : "bg-[#2a2a2a] text-[var(--text-disabled)] cursor-not-allowed"
+          : "bg-[#1A1A1A] text-[var(--text-disabled)] cursor-not-allowed"
       }`}
     >
       {pending ? "Submitting…" : isLast ? "Submit" : "Next"}
@@ -99,25 +99,18 @@ export function QuestionRunner({ set, kind, variant = "page", onClose }: Props) 
   const isOpen = current.type !== "multiple_choice";
   const questionBody = (
     <div key={current.id} className="animate-step-enter flex flex-col h-full">
-      <h2 className="text-[32px] leading-[32px] -tracking-[0.8px] font-normal text-[var(--text-standard)]">
+      <h2 className="text-[28px] leading-[32px] -tracking-[0.7px] font-normal text-[var(--text-standard)]">
         {current.prompt}
       </h2>
-      <div className={isOpen ? "pt-10 flex-1 min-h-0" : "pt-10"}>
-        {current.type === "multiple_choice" ? (
+      {current.type === "multiple_choice" ? (
+        <div className="pt-10">
           <MultipleChoiceQuestion
             choices={current.choices}
             value={answers[current.id] ?? null}
             onChange={(value) => setAnswer(current.id, value, "choice")}
           />
-        ) : (
-          <VoiceTextInput
-            value={answers[current.id] ?? ""}
-            onChange={(value, method) => setAnswer(current.id, value, method)}
-            placeholder={current.placeholder}
-            autoFocus
-          />
-        )}
-      </div>
+        </div>
+      ) : null}
       {error && (
         <p className="text-[13px] text-[#ff8b8b] text-center pt-4" role="alert">
           {error}
@@ -125,6 +118,25 @@ export function QuestionRunner({ set, kind, variant = "page", onClose }: Props) 
       )}
     </div>
   );
+
+  const openHero = isOpen && current.type === "open" ? (
+    <div key={current.id} className="animate-step-enter flex-1 min-h-0 flex items-center justify-center">
+      <h1 className="text-center text-[28px] leading-[32px] -tracking-[0.7px] text-[var(--text-strong)] font-normal px-2">
+        {current.prompt}
+      </h1>
+    </div>
+  ) : null;
+
+  const openInput = isOpen && current.type === "open" ? (
+    <OpenAnswerInput
+      value={answers[current.id] ?? ""}
+      onChange={(value, method) => setAnswer(current.id, value, method)}
+      onSubmit={onNext}
+      placeholder={current.placeholder}
+      pending={pending}
+      autoFocus
+    />
+  ) : null;
 
   if (submitted) {
     const thanksBody = (
@@ -167,7 +179,7 @@ export function QuestionRunner({ set, kind, variant = "page", onClose }: Props) 
           <div className="flex-1 min-h-0 overflow-y-auto px-4 flex items-center justify-center animate-fade-in">
             {thanksBody}
           </div>
-          <div className="px-4 pb-4 pt-2 shrink-0 bg-[#1A1A1A]">{doneButton}</div>
+          <div className="px-4 pb-4 pt-2 shrink-0 bg-[#141414]">{doneButton}</div>
         </>
       );
     }
@@ -207,13 +219,55 @@ export function QuestionRunner({ set, kind, variant = "page", onClose }: Props) 
         <div className="px-4 pt-1 shrink-0">
           <SegmentedProgress current={step + 1} total={total} />
         </div>
-        <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-10 pb-4 flex flex-col">
-          {questionBody}
-        </div>
-        <div className="px-4 pb-4 pt-0 shrink-0 bg-[#1A1A1A]">
-          {submitButton}
-        </div>
+        {isOpen ? (
+          <div className="flex-1 min-h-0 flex flex-col bg-[var(--bg-app)] -mx-px">
+            <div className="flex-1 min-h-0 px-4 flex flex-col">
+              {openHero}
+            </div>
+            {error && (
+              <p className="text-[13px] text-[#ff8b8b] text-center px-4 pb-2" role="alert">
+                {error}
+              </p>
+            )}
+            <div className="px-4 pb-4 pt-2 shrink-0">
+              {openInput}
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-10 pb-4 flex flex-col">
+              {questionBody}
+            </div>
+            <div className="px-4 pb-4 pt-0 shrink-0 bg-[#141414]">
+              {submitButton}
+            </div>
+          </>
+        )}
       </>
+    );
+  }
+
+  if (isOpen) {
+    return (
+      <div className="h-[100dvh] flex flex-col overflow-hidden">
+        <TitleBar
+          title={TITLE_BY_KIND[kind]}
+          right={`Question ${step + 1} of ${total}`}
+          backHref="/home"
+        />
+        <div className="max-w-md w-full mx-auto px-4 pt-3">
+          <SegmentedProgress current={step + 1} total={total} />
+        </div>
+        <main className="flex-1 min-h-0 max-w-md w-full mx-auto px-4 flex flex-col">
+          {openHero}
+          {error && (
+            <p className="text-[13px] text-[#ff8b8b] text-center pb-2" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="pb-6 pt-2">{openInput}</div>
+        </main>
+      </div>
     );
   }
 
@@ -233,8 +287,7 @@ export function QuestionRunner({ set, kind, variant = "page", onClose }: Props) 
         {questionBody}
       </div>
 
-      {/* Single full-width Next, fixed above the tab bar. */}
-      <div className="fixed bottom-16 inset-x-0 px-4 pb-2 pt-2 bg-[var(--bg-app)]">
+      <div className="fixed bottom-4 inset-x-0 px-4 pb-2 pt-2 bg-[var(--bg-app)]">
         <div className="max-w-md mx-auto">{submitButton}</div>
       </div>
     </>

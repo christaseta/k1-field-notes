@@ -8,8 +8,6 @@
  *   COMPLETE   — already submitted this period
  */
 
-const DAY_LABELS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-
 export type StatusVariant = "ready" | "due" | "overdue" | "complete";
 export type StatusPill = { variant: StatusVariant; label: string };
 
@@ -21,29 +19,12 @@ export function dailyStatus(submittedToday: boolean): StatusPill {
 
 export function weeklyStatus(
   submittedThisWeek: boolean,
-  preferredDay: number | null,
+  _preferredDay: number | null,
   now = new Date(),
 ): StatusPill {
   if (submittedThisWeek) return { variant: "complete", label: "COMPLETE" };
-  if (preferredDay === null || preferredDay === undefined) {
-    return { variant: "ready", label: "READY" };
-  }
-
-  const today = now.getDay();
-  // Days remaining until the preferred day (0 = today).
-  const daysUntil = (preferredDay - today + 7) % 7;
-  // Days since the preferred day passed this week (0 = today, 1 = yesterday…).
-  const daysSince = (today - preferredDay + 7) % 7;
-
-  if (daysUntil === 0) {
-    return { variant: "due", label: `DUE ${DAY_LABELS[preferredDay]}` };
-  }
-  if (daysUntil <= 2) {
-    return { variant: "due", label: `DUE ${DAY_LABELS[preferredDay]}` };
-  }
-  // The pref day has come and gone; treat as overdue until the new week starts.
-  if (daysSince > 0 && daysSince <= 4) {
-    return { variant: "overdue", label: "OVERDUE" };
-  }
-  return { variant: "ready", label: "READY" };
+  // Friday is day 5; weeks reset Sunday, so Saturday is the only day the
+  // weekly check-in can be late without rolling into the next period.
+  if (now.getDay() === 6) return { variant: "overdue", label: "OVERDUE" };
+  return { variant: "due", label: "DUE FRIDAY" };
 }
