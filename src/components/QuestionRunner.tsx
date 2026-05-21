@@ -89,7 +89,7 @@ export function QuestionRunner({ set, kind, variant = "page", onClose }: Props) 
       className={`w-full min-h-[64px] py-3 px-6 rounded-full text-[16px] font-medium transition-colors ${
         canAdvance && !pending
           ? "bg-white text-black hover:bg-slate-100"
-          : "bg-[#2a2a2a] text-[var(--text-disabled)] cursor-not-allowed"
+          : "bg-[#1A1A1A] text-[var(--text-disabled)] cursor-not-allowed"
       }`}
     >
       {pending ? "Submitting…" : isLast ? "Submit" : "Next"}
