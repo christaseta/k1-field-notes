@@ -37,8 +37,12 @@ export function SettingsPageShell({ children }: { children: React.ReactNode }) {
         visible ? "translate-y-0" : "translate-y-full"
       }`}
     >
-      <div className="safe-area-inset-top">
-        <div className="max-w-md mx-auto flex items-center justify-end px-4 py-2.5 min-h-[40px] gap-2">
+      <div
+        style={{
+          paddingTop: "calc(env(safe-area-inset-top) + 24px)",
+        }}
+      >
+        <div className="max-w-md mx-auto flex items-center justify-end px-4 pb-2 min-h-[40px] gap-2">
           <button
             type="button"
             onClick={close}
