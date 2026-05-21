@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { signInWithGoogle, signInWithMagicLink, type SignInState } from "@/app/actions/auth";
+import { signInWithMagicLink, type SignInState } from "@/app/actions/auth";
 
 export function SignInForm({ next }: { next: string }) {
   const [state, formAction, pending] = useActionState<SignInState, FormData>(
@@ -49,7 +49,7 @@ export function SignInForm({ next }: { next: string }) {
         </p>
       )}
 
-      <div className="mt-auto flex flex-col gap-3">
+      <div className="mt-auto">
         <button
           type="submit"
           disabled={!canSubmit}
@@ -60,15 +60,6 @@ export function SignInForm({ next }: { next: string }) {
           }`}
         >
           {pending ? "Sending…" : "Continue"}
-        </button>
-
-        <button
-          type="submit"
-          formAction={signInWithGoogle}
-          formNoValidate
-          className="w-full min-h-[56px] px-6 rounded-full text-[14px] font-medium border border-[#595959] text-[var(--text-strong)] hover:bg-[#1a1a1a] transition-colors"
-        >
-          Square/Block employee? Sign in with Google
         </button>
       </div>
     </form>
