@@ -1,18 +1,74 @@
 "use client";
 
+import Link from "next/link";
 import { Fragment, useMemo, useState } from "react";
-import {
-  PARTICIPANTS,
-  QUESTIONS,
-  Q1_DIST,
-  SAMPLE_QUOTES,
-  STUDY,
-  TAGS,
-  WEEKS,
-  type Participant,
-  type Question,
-  type Sentiment as SentimentValue,
-} from "./mock-data";
+
+export type ParticipantSummary = { id: string; name: string; initials: string };
+
+export type Spotlight = {
+  submissionId: string;
+  sellerId: string;
+  sellerName: string;
+  sellerInitials: string;
+  questionId: string | null;
+  questionPrompt: string | null;
+  text: string;
+  flagged: boolean;
+};
+
+export type WeekDigest = {
+  weekId: string;
+  responding: number;
+  entries: number;
+  flagged: number;
+  themes: { label: string; count: number }[];
+  spotlights: Spotlight[];
+};
+
+export type CompareQuestion = {
+  id: string;
+  kind: "MC" | "OPEN";
+  prompt: string;
+  choices?: { value: string; label: string }[];
+  source: "daily" | "weekly" | "spontaneous";
+};
+
+export type CompareResponse = {
+  submissionId: string;
+  sellerId: string;
+  sellerName: string;
+  sellerInitials: string;
+  weekId: string;
+  weekShort: string;
+  text: string | null;
+  choiceValue: string | null;
+  choiceLabel: string | null;
+  flagged: boolean;
+};
+
+export type QuestionCompareData = {
+  questions: CompareQuestion[];
+  dist: Record<string, Record<string, Record<string, number>>>;
+  responses: Record<string, CompareResponse[]>;
+};
+
+export type Study = {
+  name: string;
+  weeks: number;
+  participants: number;
+  entries: number;
+  responseRate: number;
+  flagged: number;
+};
+
+export type Week = {
+  id: string;
+  label: string;
+  dates: string;
+  startISO?: string;
+  endISO?: string;
+  theme?: string;
+};
 
 type Filters = {
   week: string;
@@ -39,9 +95,28 @@ const TABS: { id: TabId; label: string; hint: string }[] = [
   { id: "compare", label: "Question compare", hint: "By prompt" },
 ];
 
-export default function Dashboard() {
+export default function Dashboard({
+  study,
+  weeks,
+  digests,
+  compare,
+  participants,
+}: {
+  study: Study;
+  weeks: Week[];
+  digests: WeekDigest[];
+  compare: QuestionCompareData;
+  participants: ParticipantSummary[];
+}) {
   const [tab, setTab] = useState<TabId>("digest");
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+
+  const activeFilterCount =
+    (filters.week !== "ALL" ? 1 : 0) +
+    (filters.question !== "ALL" ? 1 : 0) +
+    (filters.participant !== "ALL" ? 1 : 0) +
+    (filters.flagged ? 1 : 0) +
+    (filters.search.trim() ? 1 : 0);
 
   return (
     <div className="wf-app">
@@ -49,24 +124,39 @@ export default function Dashboard() {
         <div className="wf-topbar__row">
           <div className="wf-brand">Field notes</div>
           <div className="wf-crumb">
-            <b>{STUDY.name}</b>
+            <b>{study.name}</b>
           </div>
           <div className="wf-stats">
             <span>
-              <b>{STUDY.participants}</b>participants
+              <b>{study.participants}</b>participants
             </span>
             <span>
-              <b>{STUDY.weeks}</b>weeks
+              <b>{study.weeks}</b>weeks
             </span>
             <span>
-              <b>{STUDY.entries}</b>entries
+              <b>{study.entries}</b>entries
             </span>
             <span>
-              <b>{Math.round(STUDY.responseRate * 100)}%</b>response
+              <b>{Math.round(study.responseRate * 100)}%</b>response
             </span>
             <span>
-              <b>{STUDY.flagged}</b>flagged
+              <b>{study.flagged}</b>flagged
             </span>
+            {activeFilterCount > 0 && (
+              <span
+                style={{
+                  marginLeft: 8,
+                  padding: "3px 10px",
+                  borderRadius: 999,
+                  background: "var(--wf-ink)",
+                  color: "var(--market-white)",
+                  fontFamily: "var(--market-font-mono)",
+                  fontSize: 11,
+                }}
+              >
+                {activeFilterCount} filter{activeFilterCount === 1 ? "" : "s"} active
+              </span>
+            )}
           </div>
         </div>
       </header>
@@ -86,16 +176,39 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      <FilterBar filters={filters} setFilters={setFilters} />
+      <FilterBar
+        filters={filters}
+        setFilters={setFilters}
+        weeks={weeks}
+        study={study}
+        questions={compare.questions}
+        participants={participants}
+      />
 
       <main className="wf-page">
-        {tab === "digest" ? <WeeklyDigest /> : <QuestionCompare />}
+        {tab === "digest" ? (
+          <WeeklyDigest
+            weeks={weeks}
+            digests={digests}
+            study={study}
+            filters={filters}
+          />
+        ) : (
+          <QuestionCompare
+            weeks={weeks}
+            compare={compare}
+            study={study}
+            filters={filters}
+          />
+        )}
       </main>
     </div>
   );
 }
 
 /* ───────────────── Shared components ───────────────── */
+
+type Participant = { id: string; initials: string; name: string; role?: string; biz?: string };
 
 function PChip({ p, size, hideMeta }: { p: Participant; size?: "lg" | "xl"; hideMeta?: boolean }) {
   return (
@@ -136,6 +249,8 @@ function Chip({
   return <span className={"chip" + (kind ? " is-" + kind : "")}>{children}</span>;
 }
 
+type SentimentValue = "pos" | "neu" | "neg";
+
 function Sentiment({ value }: { value: SentimentValue }) {
   return <span className={"sent is-" + value} />;
 }
@@ -169,11 +284,19 @@ function ViewTagline({
 function FilterBar({
   filters,
   setFilters,
+  weeks,
+  study,
+  questions,
+  participants,
 }: {
   filters: Filters;
   setFilters: (f: Filters) => void;
+  weeks: Week[];
+  study: Study;
+  questions: CompareQuestion[];
+  participants: ParticipantSummary[];
 }) {
-  const { week, question, participant, hasMedia, flagged, search } = filters;
+  const { week, question, participant, flagged, search } = filters;
   const isAllWeeks = week === "ALL";
 
   return (
@@ -189,7 +312,7 @@ function FilterBar({
             >
               All
             </button>
-            {WEEKS.map((w) => (
+            {weeks.map((w) => (
               <button
                 key={w.id}
                 type="button"
@@ -210,9 +333,9 @@ function FilterBar({
             onChange={(e) => setFilters({ ...filters, question: e.target.value })}
           >
             <option value="ALL">All questions</option>
-            {QUESTIONS.map((q) => (
+            {questions.map((q) => (
               <option key={q.id} value={q.id}>
-                {q.id} · {q.label}
+                {q.kind} · {q.prompt}
               </option>
             ))}
           </select>
@@ -225,23 +348,14 @@ function FilterBar({
             value={participant}
             onChange={(e) => setFilters({ ...filters, participant: e.target.value })}
           >
-            <option value="ALL">All 19 participants</option>
-            {PARTICIPANTS.map((p) => (
+            <option value="ALL">All {study.participants} participants</option>
+            {participants.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.id} · {p.name}
+                {p.name}
               </option>
             ))}
           </select>
         </div>
-
-        <button
-          type="button"
-          className={"wf-toggle" + (hasMedia ? " is-on" : "")}
-          onClick={() => setFilters({ ...filters, hasMedia: !hasMedia })}
-        >
-          <span className="wf-toggle__box" />
-          Has media
-        </button>
 
         <button
           type="button"
@@ -274,38 +388,68 @@ function FilterBar({
 
 /* ───────────────── Weekly Digest ───────────────── */
 
-function WeeklyDigest() {
-  const themesByWeek = useMemo(() => {
-    const out: Record<string, { label: string; count: number }[]> = {};
-    WEEKS.forEach((w, wi) => {
-      const slice = TAGS.slice(wi, wi + 6).concat(
-        TAGS.slice(0, Math.max(0, 6 - (TAGS.length - wi))),
-      );
-      out[w.id] = slice.map((t, i) => ({
-        label: t.label,
-        count: Math.max(3, t.count - wi * 2 - i),
-      }));
-    });
-    return out;
-  }, []);
+function WeeklyDigest({
+  weeks,
+  digests,
+  study,
+  filters,
+}: {
+  weeks: Week[];
+  digests: WeekDigest[];
+  study: Study;
+  filters: Filters;
+}) {
+  const digestById = useMemo(() => {
+    const m = new Map<string, WeekDigest>();
+    digests.forEach((d) => m.set(d.weekId, d));
+    return m;
+  }, [digests]);
 
-  const quotesByWeek = useMemo(() => {
-    const out: Record<string, typeof SAMPLE_QUOTES> = {};
-    WEEKS.forEach((w) => {
-      out[w.id] = SAMPLE_QUOTES.filter((s) => s.wid === w.id).slice(0, 2);
-    });
-    return out;
-  }, []);
+  const maxThemeCount = useMemo(
+    () => Math.max(1, ...digests.flatMap((d) => d.themes.map((t) => t.count))),
+    [digests],
+  );
+
+  const visibleWeeks = useMemo(
+    () => (filters.week === "ALL" ? weeks : weeks.filter((w) => w.id === filters.week)),
+    [weeks, filters.week],
+  );
 
   return (
     <div>
+      {visibleWeeks.length === 0 && (
+        <p style={{ color: "var(--wf-ink-3)", fontSize: 13, padding: "12px 0" }}>
+          No week matches the selected filter.
+        </p>
+      )}
       <div className="digest">
-        {WEEKS.map((w, wi) => {
-          const themes = themesByWeek[w.id];
-          const quotes = quotesByWeek[w.id];
-          const responseRate = 0.95 - wi * 0.03;
-          const flagged = 6 - wi;
-          const media = 22 - wi * 2;
+        {visibleWeeks.map((w) => {
+          const d = digestById.get(w.id);
+          const responding = d?.responding ?? 0;
+          const entries = d?.entries ?? 0;
+          const flagged = d?.flagged ?? 0;
+          const themes = d?.themes ?? [];
+          const allSpotlights = d?.spotlights ?? [];
+          const search = filters.search.trim().toLowerCase();
+          const filteredSpotlights = allSpotlights.filter((s) => {
+            if (filters.participant !== "ALL" && s.sellerId !== filters.participant) return false;
+            if (filters.flagged && !s.flagged) return false;
+            if (filters.question !== "ALL" && s.questionId !== filters.question) return false;
+            if (search) {
+              const hay = `${s.text} ${s.sellerName} ${s.questionPrompt ?? ""}`.toLowerCase();
+              if (!hay.includes(search)) return false;
+            }
+            return true;
+          });
+          const anyFilter =
+            filters.participant !== "ALL" ||
+            filters.flagged ||
+            filters.question !== "ALL" ||
+            search.length > 0;
+          const spotlights = anyFilter
+            ? filteredSpotlights.slice(0, 4)
+            : filteredSpotlights.slice(0, 2);
+          const rate = study.participants > 0 ? responding / study.participants : 0;
           return (
             <div className="weekblock" key={w.id}>
               <div className="weekblock__head">
@@ -314,11 +458,10 @@ function WeeklyDigest() {
                   <div className="weekblock__numlabel">{w.dates}</div>
                 </div>
                 <div>
-                  <h3 className="weekblock__theme">{w.theme}</h3>
+                  <h3 className="weekblock__theme">{w.theme ?? w.label}</h3>
                   <div className="weekblock__dates">
-                    {Math.round(responseRate * PARTICIPANTS.length)} of {PARTICIPANTS.length}{" "}
-                    participants responded · {flagged} entries flagged for follow-up · {media} media
-                    uploads
+                    {responding} of {study.participants} participants responded · {entries} entries
+                    · {flagged} flagged for follow-up
                   </div>
                   <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
                     {themes.slice(0, 4).map((t) => (
@@ -332,90 +475,75 @@ function WeeklyDigest() {
                   <div className="minibar">
                     <span style={{ minWidth: 80 }}>Response rate</span>
                     <div className="minibar__track">
-                      <div
-                        className="minibar__fill"
-                        style={{ width: `${responseRate * 100}%` }}
-                      />
+                      <div className="minibar__fill" style={{ width: `${rate * 100}%` }} />
                     </div>
-                    <span className="minibar__num">{Math.round(responseRate * 100)}%</span>
-                  </div>
-                  <div className="minibar">
-                    <span style={{ minWidth: 80 }}>Sentiment +</span>
-                    <div className="minibar__track">
-                      <div
-                        className="minibar__fill"
-                        style={{ width: `${60 - wi * 4}%`, background: "var(--wf-pos)" }}
-                      />
-                    </div>
-                    <span className="minibar__num">{60 - wi * 4}%</span>
-                  </div>
-                  <div className="minibar">
-                    <span style={{ minWidth: 80 }}>Sentiment −</span>
-                    <div className="minibar__track">
-                      <div
-                        className="minibar__fill"
-                        style={{ width: `${12 + wi * 5}%`, background: "var(--wf-neg)" }}
-                      />
-                    </div>
-                    <span className="minibar__num">{12 + wi * 5}%</span>
+                    <span className="minibar__num">{Math.round(rate * 100)}%</span>
                   </div>
                 </div>
               </div>
               <div className="weekblock__body">
                 <div className="weekblock__col">
                   <h4 className="weekblock__colhead">Spotlight responses</h4>
-                  {quotes.length === 0 && (
+                  {spotlights.length === 0 && (
                     <p style={{ color: "var(--wf-ink-3)", fontSize: 12 }}>
-                      No spotlight responses yet.
+                      No responses with notes yet for this week.
                     </p>
                   )}
-                  {quotes.map((qt, i) => {
-                    const p = PARTICIPANTS.find((pp) => pp.id === qt.pid)!;
-                    const q = QUESTIONS.find((qq) => qq.id === qt.qid)!;
-                    return (
-                      <div className="spotlight" key={i}>
+                  {spotlights.map((s) => (
+                    <div className="spotlight" key={s.submissionId}>
+                      {s.questionPrompt && (
                         <div className="spotlight__q">
-                          {q.id} · {q.label}
+                          {s.questionId ? `${s.questionId} · ` : ""}
+                          {s.questionPrompt}
                         </div>
-                        <div style={{ display: "flex", gap: 8 }}>
-                          <Sentiment value={qt.sentiment} />
-                          <div className="spotlight__body">&ldquo;{qt.text}&rdquo;</div>
+                      )}
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <Sentiment value="neu" />
+                        <div className="spotlight__body">&ldquo;{s.text}&rdquo;</div>
+                      </div>
+                      <div className="spotlight__foot">
+                        <div className="pchip">
+                          <span className="pchip__avatar">{s.sellerInitials}</span>
+                          <span className="pchip__id">{s.sellerName}</span>
                         </div>
-                        <div className="spotlight__foot">
-                          <PChipMini p={p} />
-                          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                            {qt.flagged && (
-                              <Chip kind="flag">
-                                <IconStamp kind="flag" />
-                              </Chip>
-                            )}
-                            {qt.media && (
-                              <Chip kind="media">
-                                <IconStamp kind="media" />
-                              </Chip>
-                            )}
-                            <button type="button" className="qcard__expand">
-                              Open →
-                            </button>
-                          </div>
+                        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                          {s.flagged && (
+                            <Chip kind="flag">
+                              <IconStamp kind="flag" />
+                            </Chip>
+                          )}
+                          <Link
+                            href={`/admin/submissions/${s.submissionId}`}
+                            className="qcard__expand"
+                          >
+                            Open →
+                          </Link>
                         </div>
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
                 <div className="weekblock__col">
                   <h4 className="weekblock__colhead">Themes this week</h4>
-                  <div className="themelist">
-                    {themes.slice(0, 6).map((t) => (
-                      <div className="themerow" key={t.label}>
-                        <span>{t.label}</span>
-                        <div className="themerow__bar">
-                          <span style={{ width: `${Math.min(100, t.count * 4)}%` }} />
+                  {themes.length === 0 ? (
+                    <p style={{ color: "var(--wf-ink-3)", fontSize: 12 }}>
+                      No tags applied yet.
+                    </p>
+                  ) : (
+                    <div className="themelist">
+                      {themes.slice(0, 6).map((t) => (
+                        <div className="themerow" key={t.label}>
+                          <span>{t.label}</span>
+                          <div className="themerow__bar">
+                            <span
+                              style={{ width: `${Math.min(100, (t.count / maxThemeCount) * 100)}%` }}
+                            />
+                          </div>
+                          <span className="themerow__num">{t.count}</span>
                         </div>
-                        <span className="themerow__num">{t.count}</span>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -428,33 +556,62 @@ function WeeklyDigest() {
 
 /* ───────────────── Question Compare ───────────────── */
 
-function QuestionCompare() {
-  const [activeQId, setActiveQId] = useState("Q4");
-  const q = QUESTIONS.find((qq) => qq.id === activeQId) as Question;
+function QuestionCompare({
+  weeks,
+  compare,
+  study,
+  filters,
+}: {
+  weeks: Week[];
+  compare: QuestionCompareData;
+  study: Study;
+  filters: Filters;
+}) {
+  const { questions, dist, responses } = compare;
+  const [localQId, setLocalQId] = useState<string>(questions[0]?.id ?? "");
+  const activeQId = filters.question !== "ALL" ? filters.question : localQId;
+  const setActiveQId = (id: string) => {
+    setLocalQId(id);
+    if (filters.question !== "ALL") {
+      // keep the filter in sync when user clicks the rail
+      // (clears the dropdown's specific selection back to ALL only on Clear filters)
+    }
+  };
+  const q = questions.find((qq) => qq.id === activeQId) ?? questions[0];
 
-  const responses = useMemo(() => {
-    return PARTICIPANTS.map((p, i) => {
-      const sample = SAMPLE_QUOTES.find((s) => s.pid === p.id && s.qid === activeQId);
-      const week = WEEKS[(i + activeQId.charCodeAt(1)) % WEEKS.length];
-      const sentiment: SentimentValue = sample
-        ? sample.sentiment
-        : (["pos", "neu", "neg", "neu"] as const)[i % 4];
-      return {
-        p,
-        week,
-        sentiment,
-        text: sample ? sample.text : null,
-        media: sample ? sample.media : i % 5 === 0,
-        flagged: sample ? sample.flagged : i % 8 === 0,
-      };
+  const allResponses = (q && responses[q.id]) || [];
+
+  const filteredResponses = useMemo(() => {
+    const search = filters.search.trim().toLowerCase();
+    return allResponses.filter((r) => {
+      if (filters.week !== "ALL" && r.weekId !== filters.week) return false;
+      if (filters.participant !== "ALL" && r.sellerId !== filters.participant) return false;
+      if (filters.flagged && !r.flagged) return false;
+      if (search) {
+        const hay = `${r.text ?? ""} ${r.choiceLabel ?? ""} ${r.sellerName}`.toLowerCase();
+        if (!hay.includes(search)) return false;
+      }
+      return true;
     });
-  }, [activeQId]);
+  }, [allResponses, filters.week, filters.participant, filters.flagged, filters.search]);
+
+  if (!q) {
+    return (
+      <p style={{ color: "var(--wf-ink-3)", fontSize: 13 }}>No questions configured.</p>
+    );
+  }
+
+  const mcDist = q.kind === "MC" ? dist[q.id] : null;
+  const visibleWeeks =
+    filters.week === "ALL" ? weeks : weeks.filter((w) => w.id === filters.week);
+  const flaggedCount = filteredResponses.filter((r) => r.flagged).length;
+  const VISIBLE = 12;
 
   return (
     <div>
       <div className="qcompare">
         <div className="qlist">
-          {QUESTIONS.map((qq) => (
+          {questions.map((qq) => (
             <div
               key={qq.id}
               className={"qlist__item" + (qq.id === activeQId ? " is-active" : "")}
@@ -467,39 +624,42 @@ function QuestionCompare() {
             >
               <span className="qkind">{qq.kind}</span>
               <div style={{ flex: 1 }}>
-                <div className="qlabel">{qq.label}</div>
-                <div className="qmeta">{qq.id} · asked every week</div>
+                <div className="qlabel">{qq.prompt}</div>
+                <div className="qmeta">
+                  {qq.source === "spontaneous" ? "spontaneous notes" : `${qq.source} · ${qq.id}`}
+                </div>
               </div>
             </div>
           ))}
         </div>
 
         <div className="qpanel">
-          {q.kind === "MC" && q.options && (
+          {q.kind === "MC" && q.choices && mcDist && (
             <div className="qdist">
               <div className="qdist__head">
                 <div>
-                  <h3 className="qdist__title">{q.label}</h3>
+                  <h3 className="qdist__title">{q.prompt}</h3>
                   <span className="qdist__hint">
-                    {q.kind} · stacked by week. Width = count of participants.
+                    Multiple choice · counts of participants per week.
                   </span>
                 </div>
-                <Chip>{q.options.length} options</Chip>
+                <Chip>{q.choices.length} options</Chip>
               </div>
               <div className="qdist__grid">
                 <div />
-                {WEEKS.map((w) => (
+                {visibleWeeks.map((w) => (
                   <div className="qdist__wlabel" key={w.id}>
                     {w.id}
                   </div>
                 ))}
 
-                {q.options.map((opt) => (
-                  <Fragment key={opt}>
-                    <div className="qdist__rowlabel">{opt}</div>
-                    {WEEKS.map((w) => {
-                      const n = Q1_DIST[w.id][opt] || 0;
-                      const pct = (n / PARTICIPANTS.length) * 100;
+                {q.choices.map((choice) => (
+                  <Fragment key={choice.value}>
+                    <div className="qdist__rowlabel">{choice.label}</div>
+                    {visibleWeeks.map((w) => {
+                      const n = mcDist[w.id]?.[choice.value] ?? 0;
+                      const denom = Math.max(1, study.participants);
+                      const pct = (n / denom) * 100;
                       return (
                         <div className="qdist__cell" key={w.id}>
                           {n > 0 && (
@@ -515,53 +675,22 @@ function QuestionCompare() {
             </div>
           )}
 
-          {q.kind === "TAGS" && q.options && (
-            <div className="qdist">
-              <div className="qdist__head">
-                <div>
-                  <h3 className="qdist__title">{q.label}</h3>
-                  <span className="qdist__hint">
-                    {q.kind} · how often each tag was picked across all weeks
-                  </span>
-                </div>
-              </div>
-              <div className="themelist">
-                {q.options.map((opt, i) => {
-                  const n = 19 - (i * 2 + (i % 3));
-                  return (
-                    <div className="themerow" key={opt}>
-                      <span>{opt}</span>
-                      <div className="themerow__bar">
-                        <span style={{ width: `${(n / 19) * 100}%` }} />
-                      </div>
-                      <span className="themerow__num">{n}/19</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {(q.kind === "SHORT" || q.kind === "LONG" || q.kind === "PHOTO") && (
+          {q.kind === "OPEN" && (
             <div
               className="qdist"
               style={{ display: "flex", gap: 24, alignItems: "center", flexWrap: "wrap" }}
             >
               <div>
-                <h3 className="qdist__title">{q.label}</h3>
+                <h3 className="qdist__title">{q.prompt}</h3>
                 <span className="qdist__hint">
-                  {q.kind === "PHOTO" ? "Photo upload" : "Free-text"} — no quant rollup, scroll for
-                  individual responses
+                  Free-text — no quant rollup, scroll for individual responses
                 </span>
               </div>
               <div style={{ marginLeft: "auto", display: "flex", gap: 6, flexWrap: "wrap" }}>
-                <Chip>{responses.filter((r) => r.text).length} answered</Chip>
-                <Chip kind="flag">
-                  <IconStamp kind="flag" /> {responses.filter((r) => r.flagged).length} flagged
-                </Chip>
-                {q.kind === "PHOTO" && (
-                  <Chip kind="media">
-                    <IconStamp kind="media" /> {responses.filter((r) => r.media).length} uploaded
+                <Chip>{filteredResponses.length} responses</Chip>
+                {flaggedCount > 0 && (
+                  <Chip kind="flag">
+                    <IconStamp kind="flag" /> {flaggedCount} flagged
                   </Chip>
                 )}
               </div>
@@ -572,100 +701,64 @@ function QuestionCompare() {
             <div className="qresps__head">
               <div>
                 <b>
-                  Every response ·{" "}
-                  {q.kind === "LONG" || q.kind === "SHORT"
-                    ? "qualitative"
-                    : q.kind === "MC"
-                      ? "multiple choice"
-                      : q.kind === "TAGS"
-                        ? "tag selections"
-                        : "photo uploads"}
+                  Every response · {q.kind === "OPEN" ? "qualitative" : "multiple choice"}
                 </b>
               </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <select className="wf-select" defaultValue="week">
-                  <option value="week">Sort: by week ↓</option>
-                  <option value="participant">Sort: by participant</option>
-                  <option value="sentiment">Sort: by sentiment</option>
-                </select>
+              <div className="qmeta" style={{ marginTop: 0 }}>
+                {filteredResponses.length} total
               </div>
             </div>
-            {responses.slice(0, 12).map((r, i) => (
-              <div className="qresps__row" key={r.p.id + i}>
-                <PChip p={r.p} />
+            {filteredResponses.length === 0 && (
+              <div style={{ padding: 24, textAlign: "center", color: "var(--wf-ink-3)", fontSize: 13 }}>
+                No responses match the current filters.
+              </div>
+            )}
+            {filteredResponses.slice(0, VISIBLE).map((r) => (
+              <div className="qresps__row" key={r.submissionId + r.weekId}>
+                <div className="pchip">
+                  <span className="pchip__avatar">{r.sellerInitials}</span>
+                  <div>
+                    <div className="pchip__name">{r.sellerName}</div>
+                  </div>
+                </div>
                 <div className="qresps__week">
-                  {r.week.id}
+                  {r.weekId}
                   <br />
-                  <span style={{ fontSize: 10, color: "var(--wf-ink-3)" }}>
-                    {r.week.dates.split("–")[0]}
-                  </span>
+                  <span style={{ fontSize: 10, color: "var(--wf-ink-3)" }}>{r.weekShort}</span>
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
-                  <Sentiment value={r.sentiment} />
+                  <Sentiment value="neu" />
                   <div style={{ flex: 1 }}>
-                    {q.kind === "MC" && q.options && (
-                      <Chip>{q.options[i % q.options.length]}</Chip>
-                    )}
-                    {q.kind === "TAGS" && q.options && (
-                      <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                        {q.options.slice(i % 3, (i % 3) + 3).map((t) => (
-                          <Chip key={t} kind="tag">
-                            {t}
-                          </Chip>
-                        ))}
-                      </div>
-                    )}
-                    {(q.kind === "SHORT" || q.kind === "LONG") &&
+                    {q.kind === "MC" && r.choiceLabel && <Chip>{r.choiceLabel}</Chip>}
+                    {q.kind === "OPEN" &&
                       (r.text ? (
                         <div className="qresps__txt">&ldquo;{r.text}&rdquo;</div>
                       ) : (
                         <span
-                          style={{
-                            fontSize: 11,
-                            color: "var(--wf-ink-3)",
-                            fontStyle: "italic",
-                          }}
+                          style={{ fontSize: 11, color: "var(--wf-ink-3)", fontStyle: "italic" }}
                         >
                           no response
                         </span>
                       ))}
-                    {q.kind === "PHOTO" &&
-                      (r.media ? (
-                        <span style={{ fontSize: 11, color: "var(--wf-ink-2)" }}>
-                          📷 Photo uploaded
-                        </span>
-                      ) : (
-                        <span
-                          style={{
-                            fontSize: 11,
-                            color: "var(--wf-ink-3)",
-                            fontStyle: "italic",
-                          }}
-                        >
-                          no upload
-                        </span>
-                      ))}
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
+                <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", alignItems: "center" }}>
                   {r.flagged && (
                     <span style={{ color: "var(--wf-accent)" }}>
                       <IconStamp kind="flag" />
                     </span>
                   )}
-                  {r.media && (
-                    <span style={{ color: "var(--wf-ink-3)" }}>
-                      <IconStamp kind="media" />
-                    </span>
-                  )}
+                  <Link href={`/admin/submissions/${r.submissionId}`} className="qcard__expand">
+                    Open →
+                  </Link>
                 </div>
               </div>
             ))}
-            <div style={{ padding: "12px 16px", textAlign: "center" }}>
-              <button type="button" className="qcard__expand">
-                Show {PARTICIPANTS.length - 12} more responses
-              </button>
-            </div>
+            {filteredResponses.length > VISIBLE && (
+              <div style={{ padding: "12px 16px", textAlign: "center" }}>
+                <span className="qmeta">{filteredResponses.length - VISIBLE} more responses</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
