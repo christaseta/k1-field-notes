@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { appSurface } from "@/lib/app-surface";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 
 export const metadata: Metadata = {
@@ -46,7 +47,7 @@ export default function RootLayout({
       <body className="antialiased">
         <ServiceWorkerRegistration />
         {children}
-        <InstallPrompt />
+        {appSurface() === "seller" && <InstallPrompt />}
       </body>
     </html>
   );
