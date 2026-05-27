@@ -2,6 +2,7 @@ import Link from "next/link";
 import "../dashboard.css";
 import "./invite.css";
 import InviteForm from "./InviteForm";
+import CopyLinkButton from "./CopyLinkButton";
 import { listSellers } from "@/lib/admin-queries";
 
 export const dynamic = "force-dynamic";
@@ -46,6 +47,7 @@ export default async function InvitePage() {
                 <span>Email</span>
                 <span>Submissions</span>
                 <span>Joined</span>
+                <span>Invite link</span>
               </div>
               {sorted.map((s) => (
                 <div className="invite__listRow" key={s.id}>
@@ -62,6 +64,9 @@ export default async function InvitePage() {
                       month: "short",
                       day: "numeric",
                     })}
+                  </span>
+                  <span>
+                    <CopyLinkButton email={s.email} />
                   </span>
                 </div>
               ))}
