@@ -4,21 +4,60 @@ import { appSurface } from "@/lib/app-surface";
 
 const PUBLIC_PATHS = ["/signin", "/auth/callback", "/auth/error"];
 
+function checkBasicAuth(
+  header: string | null,
+  user: string,
+  pass: string,
+): boolean {
+  if (!header || !header.toLowerCase().startsWith("basic ")) return false;
+  try {
+    const decoded = atob(header.slice(6).trim());
+    const idx = decoded.indexOf(":");
+    if (idx < 0) return false;
+    return decoded.slice(0, idx) === user && decoded.slice(idx + 1) === pass;
+  } catch {
+    return false;
+  }
+}
+
+const ADMIN_REALM = 'Basic realm="K1 Field Notes Admin"';
+
 export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const surface = appSurface();
 
-  // Option A deployments: each surface only exposes its own routes.
-  if (surface === "seller" && pathname.startsWith("/admin")) {
-    return new NextResponse("Not Found", { status: 404 });
+  // Admin surface: gate everything behind HTTP Basic Auth (shared password).
+  // Replaces per-user Supabase auth on this deployment.
+  if (surface === "admin") {
+    const adminUser = process.env.ADMIN_BASIC_USER;
+    const adminPass = process.env.ADMIN_BASIC_PASS;
+    if (!adminUser || !adminPass) {
+      return new NextResponse(
+        "Admin basic-auth not configured (ADMIN_BASIC_USER / ADMIN_BASIC_PASS).",
+        { status: 500 },
+      );
+    }
+    if (!checkBasicAuth(request.headers.get("authorization"), adminUser, adminPass)) {
+      return new NextResponse("Authentication required", {
+        status: 401,
+        headers: { "WWW-Authenticate": ADMIN_REALM },
+      });
+    }
+    // Only allow admin/auth/signin/root paths; everything else 404s.
+    if (
+      !pathname.startsWith("/admin") &&
+      !pathname.startsWith("/signin") &&
+      !pathname.startsWith("/auth") &&
+      pathname !== "/"
+    ) {
+      return new NextResponse("Not Found", { status: 404 });
+    }
+    // Skip the Supabase session work — basic auth is the entire admin gate.
+    return NextResponse.next({ request });
   }
-  if (
-    surface === "admin" &&
-    !pathname.startsWith("/admin") &&
-    !pathname.startsWith("/signin") &&
-    !pathname.startsWith("/auth") &&
-    pathname !== "/"
-  ) {
+
+  // Seller surface: hide /admin entirely.
+  if (pathname.startsWith("/admin")) {
     return new NextResponse("Not Found", { status: 404 });
   }
 

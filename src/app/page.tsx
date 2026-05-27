@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { appSurface } from "@/lib/app-surface";
 
 export default async function RootPage() {
+  // Admin surface: proxy already gated by Basic Auth. Send / → /admin.
   if (appSurface() === "admin") {
     redirect("/admin");
   }
