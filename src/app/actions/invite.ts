@@ -48,12 +48,17 @@ export async function generateInviteLink(
 
   // Update the seller row with the labels the admin typed. Only overwrite
   // fields if a value was provided so we don't blank existing labels on
-  // re-invite.
-  const updates: Record<string, string> = {};
-  if (displayName) updates.display_name = displayName;
-  if (businessName) updates.business_name = businessName;
-  if (Object.keys(updates).length > 0) {
-    await supabase.from("sellers").update(updates).eq("id", user.id);
+  // re-invite. (Cast: createAdminClient isn't generic over the Database
+  // schema, so .update() infers 'never' for the payload type.)
+  if (displayName || businessName) {
+    const patch: { display_name?: string; business_name?: string } = {};
+    if (displayName) patch.display_name = displayName;
+    if (businessName) patch.business_name = businessName;
+    await (supabase.from("sellers") as unknown as {
+      update: (v: typeof patch) => { eq: (col: string, val: string) => Promise<unknown> };
+    })
+      .update(patch)
+      .eq("id", user.id);
   }
 
   const redirectTo = `${sellerUrl.replace(/\/$/, "")}/auth/callback?next=${encodeURIComponent("/home")}`;
