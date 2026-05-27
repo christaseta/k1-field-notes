@@ -1,9 +1,27 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { appSurface } from "@/lib/app-surface";
 
 const PUBLIC_PATHS = ["/signin", "/auth/callback", "/auth/error"];
 
 export async function updateSession(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const surface = appSurface();
+
+  // Option A deployments: each surface only exposes its own routes.
+  if (surface === "seller" && pathname.startsWith("/admin")) {
+    return new NextResponse("Not Found", { status: 404 });
+  }
+  if (
+    surface === "admin" &&
+    !pathname.startsWith("/admin") &&
+    !pathname.startsWith("/signin") &&
+    !pathname.startsWith("/auth") &&
+    pathname !== "/"
+  ) {
+    return new NextResponse("Not Found", { status: 404 });
+  }
+
   let response = NextResponse.next({ request });
 
   // Demo-mode bypass: set via ?demo=true, persisted as a cookie. Skips
@@ -47,7 +65,6 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { pathname } = request.nextUrl;
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
 
   if (!user && !isPublic) {
