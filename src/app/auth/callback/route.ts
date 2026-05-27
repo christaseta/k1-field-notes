@@ -10,24 +10,16 @@ export async function GET(request: Request) {
 
   const supabase = await createClient();
 
-  let lastError: string | null = null;
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) return NextResponse.redirect(new URL(next, url.origin));
-    lastError = error.message;
   } else if (tokenHash && type) {
     const { error } = await supabase.auth.verifyOtp({
       type: type as "email" | "magiclink",
       token_hash: tokenHash,
     });
     if (!error) return NextResponse.redirect(new URL(next, url.origin));
-    lastError = error.message;
-  } else {
-    lastError = "missing code / token_hash";
   }
 
-  console.error("[auth/callback]", { lastError, hasCode: !!code, hasTokenHash: !!tokenHash, type });
-  const errUrl = new URL("/auth/error", url.origin);
-  if (lastError) errUrl.searchParams.set("reason", lastError);
-  return NextResponse.redirect(errUrl);
+  return NextResponse.redirect(new URL("/auth/error", url.origin));
 }
