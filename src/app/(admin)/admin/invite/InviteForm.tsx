@@ -23,28 +23,48 @@ export default function InviteForm() {
   return (
     <div className="invite">
       <form action={formAction} className="invite__form">
-        <label className="invite__label" htmlFor="email">
-          Seller email
-        </label>
-        <div className="invite__row">
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            placeholder="seller@example.com"
-            autoComplete="off"
-            className="wf-search"
-            style={{ flex: 1, minWidth: 280 }}
-          />
+        <div className="invite__grid">
+          <label className="invite__field">
+            <span className="invite__label">Name</span>
+            <input
+              name="display_name"
+              type="text"
+              placeholder="Aisha M."
+              autoComplete="off"
+              className="wf-search"
+            />
+          </label>
+          <label className="invite__field">
+            <span className="invite__label">Business name</span>
+            <input
+              name="business_name"
+              type="text"
+              placeholder="Café Luna"
+              autoComplete="off"
+              className="wf-search"
+            />
+          </label>
+          <label className="invite__field invite__field--wide">
+            <span className="invite__label">Email *</span>
+            <input
+              name="email"
+              type="email"
+              required
+              placeholder="seller@example.com"
+              autoComplete="off"
+              className="wf-search"
+            />
+          </label>
+        </div>
+        <div className="invite__actions">
           <button type="submit" className="invite__submit" disabled={isPending}>
             {isPending ? "Generating…" : "Generate invite link"}
           </button>
+          <p className="invite__hint">
+            Single-use, expires in ~60 min. Share via DM. Re-inviting an existing
+            seller updates their name / business if you provide values.
+          </p>
         </div>
-        <p className="invite__hint">
-          Creates the seller in Supabase if they don&apos;t exist yet, then returns a
-          one-time sign-in URL. Single-use, expires in ~60 minutes. Share via DM.
-        </p>
       </form>
 
       {state?.ok === false && <div className="invite__error">{state.error}</div>}

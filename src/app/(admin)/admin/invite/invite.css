@@ -1,5 +1,5 @@
 .invite {
-  max-width: 760px;
+  max-width: 960px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -11,19 +11,34 @@
   padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+}
+
+.invite__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+}
+.invite__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.invite__field--wide {
+  grid-column: 1 / -1;
 }
 
 .invite__label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--wf-ink);
 }
 
-.invite__row {
+.invite__actions {
   display: flex;
-  gap: 10px;
-  align-items: stretch;
+  gap: 14px;
+  align-items: center;
   flex-wrap: wrap;
 }
 
@@ -50,6 +65,8 @@
   font-size: 12px;
   color: var(--wf-ink-3);
   line-height: 1.5;
+  flex: 1;
+  min-width: 240px;
 }
 
 .invite__error {
@@ -122,4 +139,78 @@
 }
 .invite__backlink:hover {
   color: var(--wf-ink);
+}
+
+/* Seller list */
+.invite__listSection {
+  margin-top: 12px;
+  max-width: 960px;
+}
+.invite__listHead {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 12px;
+  color: var(--wf-ink);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.invite__listCount {
+  font-family: var(--market-font-mono);
+  font-size: 12px;
+  color: var(--wf-ink-3);
+  font-weight: 400;
+}
+
+.invite__list {
+  background: var(--market-white);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.invite__listRow {
+  display: grid;
+  grid-template-columns: 1.2fr 1.2fr 1.5fr 0.7fr 0.6fr;
+  gap: 14px;
+  padding: 12px 20px;
+  align-items: center;
+  font-size: 13px;
+  border-bottom: 1px solid var(--wf-line-soft);
+}
+.invite__listRow:last-child {
+  border-bottom: 0;
+}
+.invite__listRow--head {
+  background: var(--wf-panel);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--wf-ink-3);
+  font-weight: 500;
+}
+
+.invite__cellStrong {
+  font-weight: 500;
+  color: var(--wf-ink);
+}
+.invite__cellMono {
+  font-family: var(--market-font-mono);
+  font-size: 12px;
+  color: var(--wf-ink-2);
+  word-break: break-all;
+}
+.invite__cellMuted {
+  color: var(--wf-ink-3);
+  font-style: normal;
+  font-size: 12px;
+}
+
+@media (max-width: 800px) {
+  .invite__grid {
+    grid-template-columns: 1fr;
+  }
+  .invite__listRow {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
 }

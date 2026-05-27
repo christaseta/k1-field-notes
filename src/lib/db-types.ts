@@ -12,6 +12,7 @@ export type Seller = {
   id: string;
   email: string;
   display_name: string | null;
+  business_name: string | null;
   weekly_day_pref: number | null;
   timezone: string;
   created_at: string;

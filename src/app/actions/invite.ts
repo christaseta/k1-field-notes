@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type InviteResult =
@@ -10,9 +11,10 @@ export async function generateInviteLink(
   _prev: InviteResult | null,
   formData: FormData,
 ): Promise<InviteResult> {
-  const email = String(formData.get("email") ?? "")
-    .trim()
-    .toLowerCase();
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const displayName = String(formData.get("display_name") ?? "").trim();
+  const businessName = String(formData.get("business_name") ?? "").trim();
+
   if (!email || !email.includes("@")) {
     return { ok: false, error: "Enter a valid email address." };
   }
@@ -44,6 +46,16 @@ export async function generateInviteLink(
     if (error) return { ok: false, error: error.message };
   }
 
+  // Update the seller row with the labels the admin typed. Only overwrite
+  // fields if a value was provided so we don't blank existing labels on
+  // re-invite.
+  const updates: Record<string, string> = {};
+  if (displayName) updates.display_name = displayName;
+  if (businessName) updates.business_name = businessName;
+  if (Object.keys(updates).length > 0) {
+    await supabase.from("sellers").update(updates).eq("id", user.id);
+  }
+
   const redirectTo = `${sellerUrl.replace(/\/$/, "")}/auth/callback?next=${encodeURIComponent("/home")}`;
   const { data, error } = await supabase.auth.admin.generateLink({
     type: "magiclink",
@@ -63,5 +75,6 @@ export async function generateInviteLink(
   url.searchParams.set("type", linkType);
   url.searchParams.set("next", "/home");
 
+  revalidatePath("/admin/invite");
   return { ok: true, url: url.toString(), created };
 }
