@@ -1,0 +1,125 @@
+.invite {
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.invite__form {
+  background: var(--market-white);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.invite__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--wf-ink);
+}
+
+.invite__row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.invite__submit {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--wf-ink);
+  color: var(--market-white);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.invite__submit:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+.invite__hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--wf-ink-3);
+  line-height: 1.5;
+}
+
+.invite__error {
+  background: var(--wf-accent-tint);
+  color: var(--wf-accent);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 13px;
+}
+
+.invite__result {
+  background: var(--market-white);
+  border-radius: 16px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.invite__resultHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.invite__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: var(--wf-panel);
+  border-radius: 999px;
+  font-size: 12px;
+  font-family: var(--market-font-mono);
+  color: var(--wf-ink-2);
+}
+
+.invite__copy {
+  appearance: none;
+  background: var(--market-white);
+  border: 1px solid var(--wf-line);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--wf-ink);
+  cursor: pointer;
+}
+.invite__copy:hover {
+  background: var(--wf-panel);
+}
+
+.invite__url {
+  display: block;
+  background: var(--bcs-page);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-family: var(--market-font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  word-break: break-all;
+  color: var(--wf-ink);
+}
+
+.invite__backlink {
+  font-size: 13px;
+  color: var(--wf-ink-2);
+  text-decoration: none;
+}
+.invite__backlink:hover {
+  color: var(--wf-ink);
+}

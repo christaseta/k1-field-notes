@@ -142,6 +142,22 @@ export default function Dashboard({
             <span>
               <b>{study.flagged}</b>flagged
             </span>
+            <Link
+              href="/admin/invite"
+              style={{
+                marginLeft: 12,
+                padding: "6px 14px",
+                borderRadius: 999,
+                border: "1px solid var(--wf-line)",
+                background: "var(--market-white)",
+                color: "var(--wf-ink)",
+                fontSize: 12,
+                textDecoration: "none",
+                whiteSpace: "nowrap",
+              }}
+            >
+              + Invite seller
+            </Link>
             {activeFilterCount > 0 && (
               <span
                 style={{
