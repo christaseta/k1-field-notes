@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { listSubmissions } from "@/lib/admin-queries";
 import type { Seller } from "@/lib/db-types";
+import { displayAnswer } from "@/lib/questions";
 
 export const dynamic = "force-dynamic";
 
@@ -92,7 +93,10 @@ export default async function SellerDetailPage({
                     </td>
                     <td className="px-4 py-3 text-[var(--text-subtle)] truncate max-w-[400px]">
                       {row.note ||
-                        row.answers?.find((a) => a.answer)?.answer ||
+                        (() => {
+                          const a = row.answers?.find((a) => a.answer);
+                          return a ? displayAnswer(a) : null;
+                        })() ||
                         "—"}
                     </td>
                   </tr>

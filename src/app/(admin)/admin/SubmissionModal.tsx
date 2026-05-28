@@ -6,6 +6,7 @@ import {
   type SubmissionDetailResult,
 } from "@/app/actions/submission";
 import type { SubmissionWithSeller } from "@/lib/admin-queries";
+import { displayAnswer } from "@/lib/questions";
 
 export default function SubmissionModal({
   id,
@@ -134,7 +135,7 @@ function SubmissionDetailBody({ submission }: { submission: SubmissionWithSeller
                 </div>
                 <div className="submodal__answerPrompt">{a.prompt}</div>
                 <div className="submodal__answerBody">
-                  {a.answer || (
+                  {displayAnswer(a) || (
                     <span style={{ color: "var(--wf-ink-3)", fontStyle: "italic" }}>
                       No answer
                     </span>
