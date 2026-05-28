@@ -720,9 +720,9 @@
 }
 .weekblock__num {
   font-family: var(--market-font-mono);
-  font-size: 34px;
+  font-size: 22px;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
   color: var(--wf-ink);
   line-height: 1;
 }
