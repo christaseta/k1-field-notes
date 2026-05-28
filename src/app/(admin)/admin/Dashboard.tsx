@@ -72,9 +72,11 @@ export type Week = {
   theme?: string;
 };
 
+type QuestionTypeFilter = "ALL" | "MC" | "OPEN" | "SPONTANEOUS";
+
 type Filters = {
   week: string;
-  question: string;
+  question: QuestionTypeFilter;
   participant: string;
   hasMedia: boolean;
   flagged: boolean;
@@ -146,7 +148,6 @@ export default function Dashboard({
         setFilters={setFilters}
         weeks={weeks}
         study={study}
-        questions={compare.questions}
         participants={participants}
         mode={view === "digest" ? "week-only" : "full"}
       />
@@ -261,7 +262,6 @@ function FilterBar({
   setFilters,
   weeks,
   study,
-  questions,
   participants,
   mode = "full",
 }: {
@@ -269,7 +269,6 @@ function FilterBar({
   setFilters: (f: Filters) => void;
   weeks: Week[];
   study: Study;
-  questions: CompareQuestion[];
   participants: ParticipantSummary[];
   mode?: "full" | "week-only";
 }) {
@@ -306,18 +305,21 @@ function FilterBar({
         {!weekOnly && (
           <>
             <div className="wf-fgroup">
-              <span className="wf-flabel">Question</span>
+              <span className="wf-flabel">Question type</span>
               <select
                 className="wf-select"
                 value={question}
-                onChange={(e) => setFilters({ ...filters, question: e.target.value })}
+                onChange={(e) =>
+                  setFilters({
+                    ...filters,
+                    question: e.target.value as QuestionTypeFilter,
+                  })
+                }
               >
-                <option value="ALL">All questions</option>
-                {questions.map((q) => (
-                  <option key={q.id} value={q.id}>
-                    {q.kind} · {q.prompt}
-                  </option>
-                ))}
+                <option value="ALL">All question types</option>
+                <option value="MC">Multiple choice</option>
+                <option value="OPEN">Open ended</option>
+                <option value="SPONTANEOUS">Spontaneous</option>
               </select>
             </div>
 
@@ -428,7 +430,6 @@ function WeeklyDigest({
           const filteredSpotlights = allSpotlights.filter((s) => {
             if (filters.participant !== "ALL" && s.sellerId !== filters.participant) return false;
             if (filters.flagged && !s.flagged) return false;
-            if (filters.question !== "ALL" && s.questionId !== filters.question) return false;
             if (search) {
               const hay = `${s.text} ${s.sellerName} ${s.questionPrompt ?? ""}`.toLowerCase();
               if (!hay.includes(search)) return false;
@@ -438,7 +439,6 @@ function WeeklyDigest({
           const anyFilter =
             filters.participant !== "ALL" ||
             filters.flagged ||
-            filters.question !== "ALL" ||
             search.length > 0;
           const spotlights = anyFilter
             ? filteredSpotlights.slice(0, 4)
@@ -565,16 +565,28 @@ function QuestionCompare({
   onOpen: (id: string) => void;
 }) {
   const { questions, dist, responses } = compare;
-  const [localQId, setLocalQId] = useState<string>(questions[0]?.id ?? "");
-  const activeQId = filters.question !== "ALL" ? filters.question : localQId;
-  const setActiveQId = (id: string) => {
-    setLocalQId(id);
-    if (filters.question !== "ALL") {
-      // keep the filter in sync when user clicks the rail
-      // (clears the dropdown's specific selection back to ALL only on Clear filters)
+
+  // Narrow the rail by the question-type filter.
+  const visibleQuestions = useMemo(() => {
+    if (filters.question === "ALL") return questions;
+    if (filters.question === "SPONTANEOUS") {
+      return questions.filter((q) => q.source === "spontaneous");
     }
-  };
-  const q = questions.find((qq) => qq.id === activeQId) ?? questions[0];
+    if (filters.question === "OPEN") {
+      return questions.filter((q) => q.kind === "OPEN" && q.source !== "spontaneous");
+    }
+    // MC
+    return questions.filter((q) => q.kind === "MC");
+  }, [questions, filters.question]);
+
+  const [localQId, setLocalQId] = useState<string>(questions[0]?.id ?? "");
+  // If the locally-selected question isn't in the filtered rail anymore,
+  // auto-snap to the first visible one.
+  const activeQId = visibleQuestions.some((q) => q.id === localQId)
+    ? localQId
+    : (visibleQuestions[0]?.id ?? "");
+  const setActiveQId = (id: string) => setLocalQId(id);
+  const q = questions.find((qq) => qq.id === activeQId) ?? visibleQuestions[0];
 
   const allResponses = (q && responses[q.id]) || [];
 
@@ -611,7 +623,7 @@ function QuestionCompare({
     <div>
       <div className="qcompare">
         <div className="qlist">
-          {questions.map((qq) => (
+          {visibleQuestions.map((qq) => (
             <div
               key={qq.id}
               className={"qlist__item" + (qq.id === activeQId ? " is-active" : "")}
