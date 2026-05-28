@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Fragment, useMemo, useState } from "react";
+import AdminNav from "./AdminNav";
 
 export type ParticipantSummary = { id: string; name: string; initials: string };
 
@@ -122,9 +123,11 @@ export default function Dashboard({
     <div className="wf-app">
       <header className="wf-topbar">
         <div className="wf-topbar__row">
+          <div className="wf-brand">Field notes</div>
           <div className="wf-crumb">
             <b>{study.name}</b>
           </div>
+          <AdminNav />
         </div>
         <div className="wf-topbar__row wf-topbar__row--stats">
           <div className="wf-stats">

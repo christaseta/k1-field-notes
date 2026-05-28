@@ -1,89 +1,35 @@
 /* Diary Dashboard — scoped to .wf-app
    Ported from claude.ai/design handoff (Diary Dashboard Wireframes v2). */
 
-/* ---- Admin shell (sidebar + main) -------------------------------- */
-
-.admin-shell {
-  display: flex;
-  min-height: 100vh;
-  background: #eeeeee;
-}
-
-.admin-shell__main {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
+/* ---- Inline admin nav (top-right of every admin page) ------------ */
 
 .admin-nav {
-  width: 220px;
-  flex: none;
-  padding: 28px 18px;
-  background: #ffffff;
+  margin-left: auto;
   display: flex;
-  flex-direction: column;
-  gap: 24px;
-  position: sticky;
-  top: 0;
-  align-self: flex-start;
-  height: 100vh;
-  font-family:
-    "Cash Sans", Helvetica, Arial, sans-serif;
-}
-
-.admin-nav__brand {
-  font-weight: 600;
-  font-size: 20px;
-  letter-spacing: -0.015em;
-  color: #101010;
-  padding: 0 10px;
-}
-
-.admin-nav__list {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .admin-nav__link {
-  display: block;
-  padding: 9px 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #5e5e5e;
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--wf-ink-2);
   text-decoration: none;
   transition:
     background-color 120ms ease,
     color 120ms ease;
+  white-space: nowrap;
 }
 .admin-nav__link:hover {
-  background: #f0f0f0;
-  color: #101010;
+  background: var(--market-gray-95);
+  color: var(--wf-ink);
 }
 .admin-nav__link.is-active {
-  background: #101010;
-  color: #ffffff;
-}
-
-@media (max-width: 800px) {
-  .admin-shell {
-    flex-direction: column;
-  }
-  .admin-nav {
-    width: 100%;
-    height: auto;
-    padding: 16px 24px;
-    flex-direction: row;
-    gap: 16px;
-    align-items: center;
-    position: static;
-  }
-  .admin-nav__list {
-    flex-direction: row;
-    gap: 6px;
-    overflow-x: auto;
-  }
+  background: var(--wf-ink);
+  color: var(--market-white);
 }
 
 

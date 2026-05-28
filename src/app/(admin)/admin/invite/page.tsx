@@ -3,6 +3,7 @@ import "./invite.css";
 import InviteForm from "./InviteForm";
 import CopyLinkButton from "./CopyLinkButton";
 import SendSmsButton from "./SendSmsButton";
+import AdminNav from "../AdminNav";
 import { listSellers } from "@/lib/admin-queries";
 
 export const dynamic = "force-dynamic";
@@ -17,9 +18,11 @@ export default async function InvitePage() {
     <div className="wf-app">
       <header className="wf-topbar">
         <div className="wf-topbar__row">
+          <div className="wf-brand">Field notes</div>
           <div className="wf-crumb">
             <b>Invite a seller</b>
           </div>
+          <AdminNav />
         </div>
       </header>
       <main className="wf-page">

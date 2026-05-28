@@ -2,8 +2,6 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/admin-auth";
 import { appSurface } from "@/lib/app-surface";
-import AdminNav from "./AdminNav";
-import "./dashboard.css";
 
 export default async function AdminLayout({
   children,
@@ -13,19 +11,17 @@ export default async function AdminLayout({
   // On the admin deployment the proxy enforces HTTP Basic Auth — no further
   // per-user check needed. On the seller deployment /admin is 404'd at the
   // proxy, so this branch never runs there.
-  if (appSurface() !== "admin") {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) redirect("/signin?next=/admin");
-    if (!isAdmin(user)) redirect("/home");
+  if (appSurface() === "admin") {
+    return <>{children}</>;
   }
 
-  return (
-    <div className="admin-shell">
-      <AdminNav />
-      <div className="admin-shell__main">{children}</div>
-    </div>
-  );
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/signin?next=/admin");
+  if (!isAdmin(user)) redirect("/home");
+
+  return <>{children}</>;
 }
