@@ -100,23 +100,62 @@ export const weeklyQuestionSets: QuestionSet[] = [
     title: "Weekly check-in — Week 1",
     questions: [
       {
-        id: "kiosk_avoidance",
+        id: "kiosk_vs_counter",
         type: "multiple_choice",
         prompt:
-          "How often, if at all, did customers choose to avoid the kiosk and come to you/your staff instead this week?",
+          "This week, how would you describe the mix between customers using the kiosk vs. coming to the counter?",
         choices: [
-          { value: "rarely", label: "Rarely" },
-          { value: "few", label: "A few times" },
-          { value: "often", label: "Pretty often" },
-          { value: "daily", label: "Daily" },
+          { value: "almost_all_kiosk", label: "Almost everyone went to the kiosk" },
+          { value: "more_kiosk", label: "More kiosk than counter" },
+          { value: "even", label: "Pretty even split" },
+          { value: "more_counter", label: "More counter than kiosk" },
+          { value: "almost_all_counter", label: "Almost everyone came to the counter" },
         ],
       },
       {
         id: "stuck_point",
         type: "open",
         prompt:
-          "What's the most common point where customers seem to get stuck or confused at the kiosk?",
+          "Think about the moments this week where customers got confused or stuck. What's the most common place that happens?",
         placeholder: "Where in the flow does it happen, and what do they do?",
+      },
+      {
+        id: "seller_preparedness",
+        type: "multiple_choice",
+        prompt:
+          "This week, how prepared did you feel to support customers who had trouble with the kiosk?",
+        choices: [
+          { value: "very", label: "Very prepared, I knew what to do" },
+          { value: "mostly", label: "Mostly prepared, a few things caught me off guard" },
+          { value: "somewhat", label: "Somewhat prepared, I was figuring it out as I went" },
+          { value: "not_very", label: "Not very prepared, I wasn't sure how to help" },
+        ],
+      },
+      {
+        id: "team_should_know",
+        type: "open",
+        prompt:
+          "What's one thing that happened this week — good or bad — that you think the team building this kiosk should know about?",
+        placeholder: "Share a moment, observation, or piece of feedback…",
+      },
+      {
+        id: "week_easier_harder",
+        type: "multiple_choice",
+        prompt: "Did the kiosk make your week easier or harder?",
+        choices: [
+          { value: "way_easier", label: "Way easier" },
+          { value: "little_easier", label: "A little easier" },
+          { value: "no_difference", label: "No difference yet" },
+          { value: "little_harder", label: "A little harder" },
+          { value: "lot_harder", label: "A lot harder" },
+        ],
+      },
+      {
+        id: "easier_harder_why",
+        type: "open",
+        prompt:
+          "What's making it feel that way? Please share one example from this week.",
+        placeholder: "One specific example from this week…",
       },
     ],
   },
