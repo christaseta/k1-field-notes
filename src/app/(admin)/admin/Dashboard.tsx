@@ -273,7 +273,7 @@ function FilterBar({
   participants: ParticipantSummary[];
   mode?: "full" | "week-only";
 }) {
-  const { week, question, participant, flagged, search } = filters;
+  const { week, question, participant, flagged, hasMedia, search } = filters;
   const isAllWeeks = week === "ALL";
   const weekOnly = mode === "week-only";
 
@@ -344,6 +344,16 @@ function FilterBar({
             >
               <span className="wf-toggle__box" />
               Flagged
+            </button>
+
+            <button
+              type="button"
+              className={"wf-toggle" + (hasMedia ? " is-on" : "")}
+              onClick={() => setFilters({ ...filters, hasMedia: !hasMedia })}
+              title="Submissions with photos. No media uploaded yet, so this filter currently hides everything."
+            >
+              <span className="wf-toggle__box" />
+              Has media
             </button>
 
             <input
@@ -570,6 +580,9 @@ function QuestionCompare({
 
   const filteredResponses = useMemo(() => {
     const search = filters.search.trim().toLowerCase();
+    // Photos / images aren't in the schema yet; the toggle is wired but
+    // hides everything until media support exists.
+    if (filters.hasMedia) return [];
     return allResponses.filter((r) => {
       if (filters.week !== "ALL" && r.weekId !== filters.week) return false;
       if (filters.participant !== "ALL" && r.sellerId !== filters.participant) return false;
@@ -580,7 +593,7 @@ function QuestionCompare({
       }
       return true;
     });
-  }, [allResponses, filters.week, filters.participant, filters.flagged, filters.search]);
+  }, [allResponses, filters.week, filters.participant, filters.flagged, filters.hasMedia, filters.search]);
 
   if (!q) {
     return (
