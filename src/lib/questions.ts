@@ -38,37 +38,55 @@ export const dailyQuestionSet: QuestionSet = {
   title: "Daily check-in",
   questions: [
     {
-      id: "kiosk_interactions",
+      id: "kiosk_usage",
       type: "multiple_choice",
-      prompt: "How did customer interactions with the kiosk go today?",
+      prompt: "How many times did customers use the kiosk today?",
       choices: [
-        { value: "none", label: "No issues" },
-        { value: "minor", label: "Minor hiccups" },
-        { value: "noticeable", label: "Noticeable friction" },
-        { value: "significant", label: "Significant problems" },
+        { value: "most_or_all", label: "Most or all orders went through it" },
+        { value: "half", label: "About half and half" },
+        { value: "few", label: "A few customers used it" },
+        { value: "none", label: "No one really used it today" },
+        { value: "not_around", label: "I wasn't around the kiosk much today" },
+      ],
+    },
+    {
+      id: "kiosk_experience",
+      type: "multiple_choice",
+      prompt: "How did it go with customers who tried the kiosk?",
+      choices: [
+        { value: "smooth", label: "Smooth, most got through without help" },
+        { value: "nudge", label: "A few needed a nudge or question answered" },
+        { value: "stuck", label: "Many got stuck and needed help" },
+        { value: "rough", label: "It was a rough day at the kiosk" },
       ],
     },
     {
       id: "kiosk_moment",
       type: "open",
-      prompt: "What kept coming up? Describe one moment that stood out.",
+      prompt: "What kept coming up? Walk us through one moment that stood out.",
       placeholder: "A specific moment, customer reaction, or pattern you noticed…",
       showWhen: {
-        questionId: "kiosk_interactions",
-        whenAnswerIn: ["minor", "noticeable", "significant"],
+        questionId: "kiosk_experience",
+        whenAnswerIn: ["stuck", "rough"],
       },
     },
     {
-      id: "voice_comfort",
+      id: "voice_usage",
       type: "multiple_choice",
-      prompt:
-        "On the whole did customers seem comfortable talking to the AI voice, or did they hesitate?",
+      prompt: "Were customers talking to the AI voice today?",
       choices: [
-        { value: "comfortable", label: "Comfortable" },
-        { value: "warmed_up", label: "Hesitant at first, then okay" },
-        { value: "uncomfortable", label: "Uncomfortable" },
-        { value: "mixed", label: "Mixed" },
+        { value: "most", label: "Yes, most were talking to it" },
+        { value: "mixed", label: "Mixed, some were, some weren't" },
+        { value: "few", label: "A few tried it, but most stayed silent or tapped instead" },
+        { value: "avoided", label: "Not really, customers mostly avoided the voice altogether" },
       ],
+    },
+    {
+      id: "voice_observation",
+      type: "open",
+      prompt:
+        "What specifically did you notice when customers heard the kiosk speak to them or they spoke to it? Describe what you saw or heard.",
+      placeholder: "What you saw or heard…",
     },
   ],
 };
