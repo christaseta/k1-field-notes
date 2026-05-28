@@ -108,13 +108,6 @@ export default function Dashboard({
 }) {
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
 
-  const activeFilterCount =
-    (filters.week !== "ALL" ? 1 : 0) +
-    (filters.question !== "ALL" ? 1 : 0) +
-    (filters.participant !== "ALL" ? 1 : 0) +
-    (filters.flagged ? 1 : 0) +
-    (filters.search.trim() ? 1 : 0);
-
   return (
     <div className="wf-app">
       <header className="wf-topbar">
@@ -142,21 +135,6 @@ export default function Dashboard({
             <span>
               <b>{study.flagged}</b>flagged
             </span>
-            {activeFilterCount > 0 && (
-              <span
-                style={{
-                  marginLeft: 8,
-                  padding: "3px 10px",
-                  borderRadius: 999,
-                  background: "var(--wf-ink)",
-                  color: "var(--market-white)",
-                  fontFamily: "var(--market-font-mono)",
-                  fontSize: 11,
-                }}
-              >
-                {activeFilterCount} filter{activeFilterCount === 1 ? "" : "s"} active
-              </span>
-            )}
           </div>
         </div>
       </header>
