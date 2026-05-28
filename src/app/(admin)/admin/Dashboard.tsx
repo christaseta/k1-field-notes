@@ -625,9 +625,6 @@ function QuestionCompare({
               <span className="qkind">{qq.kind}</span>
               <div style={{ flex: 1 }}>
                 <div className="qlabel">{qq.prompt}</div>
-                <div className="qmeta">
-                  {qq.source === "spontaneous" ? "spontaneous notes" : `${qq.source} · ${qq.id}`}
-                </div>
               </div>
             </div>
           ))}
