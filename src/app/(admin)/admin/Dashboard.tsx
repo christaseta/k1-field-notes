@@ -168,6 +168,7 @@ export default function Dashboard({
         study={study}
         questions={compare.questions}
         participants={participants}
+        mode={view === "digest" ? "week-only" : "full"}
       />
 
       <main className="wf-page">
@@ -273,6 +274,7 @@ function FilterBar({
   study,
   questions,
   participants,
+  mode = "full",
 }: {
   filters: Filters;
   setFilters: (f: Filters) => void;
@@ -280,9 +282,11 @@ function FilterBar({
   study: Study;
   questions: CompareQuestion[];
   participants: ParticipantSummary[];
+  mode?: "full" | "week-only";
 }) {
   const { week, question, participant, flagged, search } = filters;
   const isAllWeeks = week === "ALL";
+  const weekOnly = mode === "week-only";
 
   return (
     <div className="wf-filters">
@@ -310,54 +314,58 @@ function FilterBar({
           </div>
         </div>
 
-        <div className="wf-fgroup">
-          <span className="wf-flabel">Question</span>
-          <select
-            className="wf-select"
-            value={question}
-            onChange={(e) => setFilters({ ...filters, question: e.target.value })}
-          >
-            <option value="ALL">All questions</option>
-            {questions.map((q) => (
-              <option key={q.id} value={q.id}>
-                {q.kind} · {q.prompt}
-              </option>
-            ))}
-          </select>
-        </div>
+        {!weekOnly && (
+          <>
+            <div className="wf-fgroup">
+              <span className="wf-flabel">Question</span>
+              <select
+                className="wf-select"
+                value={question}
+                onChange={(e) => setFilters({ ...filters, question: e.target.value })}
+              >
+                <option value="ALL">All questions</option>
+                {questions.map((q) => (
+                  <option key={q.id} value={q.id}>
+                    {q.kind} · {q.prompt}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        <div className="wf-fgroup">
-          <span className="wf-flabel">Participant</span>
-          <select
-            className="wf-select"
-            value={participant}
-            onChange={(e) => setFilters({ ...filters, participant: e.target.value })}
-          >
-            <option value="ALL">All {study.participants} participants</option>
-            {participants.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </div>
+            <div className="wf-fgroup">
+              <span className="wf-flabel">Participant</span>
+              <select
+                className="wf-select"
+                value={participant}
+                onChange={(e) => setFilters({ ...filters, participant: e.target.value })}
+              >
+                <option value="ALL">All {study.participants} participants</option>
+                {participants.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        <button
-          type="button"
-          className={"wf-toggle" + (flagged ? " is-on" : "")}
-          onClick={() => setFilters({ ...filters, flagged: !flagged })}
-        >
-          <span className="wf-toggle__box" />
-          Flagged
-        </button>
+            <button
+              type="button"
+              className={"wf-toggle" + (flagged ? " is-on" : "")}
+              onClick={() => setFilters({ ...filters, flagged: !flagged })}
+            >
+              <span className="wf-toggle__box" />
+              Flagged
+            </button>
 
-        <input
-          className="wf-search"
-          type="text"
-          placeholder="Search responses…"
-          value={search}
-          onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-        />
+            <input
+              className="wf-search"
+              type="text"
+              placeholder="Search responses…"
+              value={search}
+              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            />
+          </>
+        )}
 
         <button
           type="button"
