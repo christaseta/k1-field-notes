@@ -52,7 +52,7 @@
   --market-font-mono: "Cash Sans Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Block chart style guide tokens */
-  --bcs-page: #eeeeee;
+  --bcs-page: #f8f8f8;
   --bcs-grid: rgba(26, 26, 26, 0.08);
   --bcs-baseline: #343434;
   --bcs-tick: #6d6d6d;
@@ -103,7 +103,7 @@
   position: sticky;
   top: 0;
   z-index: 30;
-  background: var(--market-white);
+  background: var(--bcs-page);
 }
 .wf-topbar__row {
   max-width: 1440px;
