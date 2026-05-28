@@ -82,9 +82,9 @@
 }
 
 .submodal__kind {
-  font-family: var(--market-font-mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--wf-ink-3);
 }
@@ -112,12 +112,23 @@
   margin-top: 18px;
 }
 .submodal__sectionHead {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--wf-ink-3);
   margin: 0 0 10px;
+}
+
+/* Inside the modal, override the dashboard's mono pchip styles so the
+   seller chip reads as plain sans. */
+.submodal__sheet .pchip__avatar,
+.submodal__sheet .pchip__id {
+  font-family: var(--market-font-sans);
+}
+.submodal__sheet .pchip__id {
+  font-size: 13px;
+  color: var(--wf-ink);
 }
 
 .submodal__body {
@@ -135,11 +146,11 @@
 }
 
 .submodal__answerMeta {
-  font-family: var(--market-font-mono);
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 500;
   color: var(--wf-ink-3);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   margin-bottom: 6px;
 }
 
