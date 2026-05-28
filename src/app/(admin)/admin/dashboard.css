@@ -138,7 +138,7 @@
 }
 .wf-topbar__row--stats {
   padding-top: 0 !important;
-  padding-bottom: 18px !important;
+  padding-bottom: 0 !important;
 }
 .wf-stats {
   display: flex;
@@ -213,7 +213,7 @@
 .wf-filters__row {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 20px 48px;
+  padding: 40px 48px 20px;
   display: flex;
   gap: 12px;
   align-items: center;
@@ -338,7 +338,7 @@
   flex: 1;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 24px 48px 96px;
+  padding: 40px 48px 96px;
   width: 100%;
 }
 .wf-tagline {
