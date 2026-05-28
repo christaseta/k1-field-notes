@@ -209,7 +209,6 @@
 /* Filter bar — sits on page bg (no panel fill) per Block reporting style */
 .wf-filters {
   background: var(--bcs-page);
-  border-bottom: 1px solid var(--wf-line);
 }
 .wf-filters__row {
   max-width: 1440px;
