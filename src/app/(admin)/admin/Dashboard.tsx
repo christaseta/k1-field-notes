@@ -116,7 +116,7 @@ export default function Dashboard({
         <div className="wf-topbar__row">
           <div className="wf-brand">Field notes</div>
           <div className="wf-crumb">
-            <b>{study.name}</b>
+            <b>{view === "submissions" ? "Seller submissions" : study.name}</b>
           </div>
           <AdminNav />
         </div>
