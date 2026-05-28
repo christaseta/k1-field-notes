@@ -3,6 +3,7 @@ import "../dashboard.css";
 import "./invite.css";
 import InviteForm from "./InviteForm";
 import CopyLinkButton from "./CopyLinkButton";
+import SendSmsButton from "./SendSmsButton";
 import { listSellers } from "@/lib/admin-queries";
 
 export const dynamic = "force-dynamic";
@@ -45,9 +46,11 @@ export default async function InvitePage() {
                 <span>Name</span>
                 <span>Business</span>
                 <span>Email</span>
+                <span>Phone</span>
                 <span>Submissions</span>
                 <span>Joined</span>
                 <span>Invite link</span>
+                <span>SMS</span>
               </div>
               {sorted.map((s) => (
                 <div className="invite__listRow" key={s.id}>
@@ -58,6 +61,9 @@ export default async function InvitePage() {
                     {s.business_name || <em className="invite__cellMuted">—</em>}
                   </span>
                   <span className="invite__cellMono">{s.email}</span>
+                  <span className="invite__cellMono">
+                    {s.phone || <em className="invite__cellMuted">—</em>}
+                  </span>
                   <span className="invite__cellMono">{s.submission_count}</span>
                   <span className="invite__cellMuted">
                     {new Date(s.created_at).toLocaleDateString(undefined, {
@@ -67,6 +73,9 @@ export default async function InvitePage() {
                   </span>
                   <span>
                     <CopyLinkButton email={s.email} />
+                  </span>
+                  <span>
+                    <SendSmsButton sellerId={s.id} hasPhone={!!s.phone} />
                   </span>
                 </div>
               ))}

@@ -74,7 +74,7 @@ export async function listSellers(): Promise<SellerWithCounts[]> {
   const supabase = createAdminClient();
   const { data: sellers, error } = await supabase
     .from("sellers")
-    .select("id, email, display_name, business_name, weekly_day_pref, timezone, created_at")
+    .select("id, email, display_name, business_name, phone, weekly_day_pref, timezone, created_at")
     .order("created_at", { ascending: false });
   if (error) throw error;
 

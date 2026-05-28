@@ -44,7 +44,7 @@ export default function InviteForm() {
               className="wf-search"
             />
           </label>
-          <label className="invite__field invite__field--wide">
+          <label className="invite__field">
             <span className="invite__label">Email *</span>
             <input
               name="email"
@@ -55,14 +55,27 @@ export default function InviteForm() {
               className="wf-search"
             />
           </label>
+          <label className="invite__field">
+            <span className="invite__label">Phone (for SMS invite)</span>
+            <input
+              name="phone"
+              type="tel"
+              placeholder="+14155551234"
+              autoComplete="off"
+              className="wf-search"
+            />
+          </label>
         </div>
         <div className="invite__actions">
           <button type="submit" className="invite__submit" disabled={isPending}>
             {isPending ? "Generating…" : "Generate invite link"}
           </button>
+          <label className="invite__sendSms">
+            <input type="checkbox" name="send_sms" />
+            <span>Also send via SMS</span>
+          </label>
           <p className="invite__hint">
-            Single-use, expires in ~60 min. Share via DM. Re-inviting an existing
-            seller updates their name / business if you provide values.
+            Single-use link, expires in ~60 min. Phone must be E.164 (e.g. +14155551234).
           </p>
         </div>
       </form>
@@ -75,13 +88,25 @@ export default function InviteForm() {
             <span className="invite__badge">
               {state.created ? "New seller" : "Existing seller"}
             </span>
-            <button
-              type="button"
-              onClick={() => copy(state.url)}
-              className="invite__copy"
-            >
-              {copied ? "Copied ✓" : "Copy URL"}
-            </button>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              {state.smsSent && (
+                <span className="invite__badge" style={{ background: "var(--wf-pos)", color: "var(--market-white)" }}>
+                  SMS sent ✓
+                </span>
+              )}
+              {state.smsError && (
+                <span className="invite__badge" style={{ background: "var(--wf-accent-tint)", color: "var(--wf-accent)" }}>
+                  SMS error: {state.smsError}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => copy(state.url)}
+                className="invite__copy"
+              >
+                {copied ? "Copied ✓" : "Copy URL"}
+              </button>
+            </div>
           </div>
           <code className="invite__url">{state.url}</code>
         </div>
