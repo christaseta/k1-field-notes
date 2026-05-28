@@ -126,6 +126,24 @@ export default function Dashboard({
           <div className="wf-crumb">
             <b>{study.name}</b>
           </div>
+          <Link
+            href="/admin/invite"
+            style={{
+              marginLeft: "auto",
+              padding: "6px 14px",
+              borderRadius: 999,
+              border: "1px solid var(--wf-line)",
+              background: "var(--market-white)",
+              color: "var(--wf-ink)",
+              fontSize: 12,
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            + Invite seller
+          </Link>
+        </div>
+        <div className="wf-topbar__row wf-topbar__row--stats">
           <div className="wf-stats">
             <span>
               <b>{study.participants}</b>participants
@@ -142,22 +160,6 @@ export default function Dashboard({
             <span>
               <b>{study.flagged}</b>flagged
             </span>
-            <Link
-              href="/admin/invite"
-              style={{
-                marginLeft: 12,
-                padding: "6px 14px",
-                borderRadius: 999,
-                border: "1px solid var(--wf-line)",
-                background: "var(--market-white)",
-                color: "var(--wf-ink)",
-                fontSize: 12,
-                textDecoration: "none",
-                whiteSpace: "nowrap",
-              }}
-            >
-              + Invite seller
-            </Link>
             {activeFilterCount > 0 && (
               <span
                 style={{

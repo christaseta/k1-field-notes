@@ -104,12 +104,17 @@
   color: var(--wf-ink);
   font-weight: 400;
 }
+.wf-topbar__row--stats {
+  padding-top: 0 !important;
+  padding-bottom: 18px !important;
+}
 .wf-stats {
-  margin-left: auto;
   display: flex;
   gap: 18px;
   color: var(--wf-ink-2);
   font-size: 12px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 .wf-stats b {
   color: var(--wf-ink);
