@@ -1,5 +1,4 @@
 .invite {
-  max-width: 960px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -153,7 +152,6 @@
 /* Seller list */
 .invite__listSection {
   margin-top: 12px;
-  max-width: 960px;
 }
 .invite__listHead {
   font-size: 15px;
