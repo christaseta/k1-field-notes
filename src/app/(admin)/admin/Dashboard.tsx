@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Fragment, useMemo, useState } from "react";
 import AdminNav from "./AdminNav";
+import SubmissionModal from "./SubmissionModal";
 
 export type ParticipantSummary = { id: string; name: string; initials: string };
 
@@ -107,6 +108,7 @@ export default function Dashboard({
   view?: DashboardView;
 }) {
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const [modalSubmissionId, setModalSubmissionId] = useState<string | null>(null);
 
   return (
     <div className="wf-app">
@@ -156,16 +158,25 @@ export default function Dashboard({
             digests={digests}
             study={study}
             filters={filters}
+            onOpen={setModalSubmissionId}
           />
         ) : (
           <QuestionCompare
             weeks={weeks}
             compare={compare}
             study={study}
+            onOpen={setModalSubmissionId}
             filters={filters}
           />
         )}
       </main>
+
+      {modalSubmissionId && (
+        <SubmissionModal
+          id={modalSubmissionId}
+          onClose={() => setModalSubmissionId(null)}
+        />
+      )}
     </div>
   );
 }
@@ -364,11 +375,13 @@ function WeeklyDigest({
   digests,
   study,
   filters,
+  onOpen,
 }: {
   weeks: Week[];
   digests: WeekDigest[];
   study: Study;
   filters: Filters;
+  onOpen: (id: string) => void;
 }) {
   const digestById = useMemo(() => {
     const m = new Map<string, WeekDigest>();
@@ -483,12 +496,13 @@ function WeeklyDigest({
                               <IconStamp kind="flag" />
                             </Chip>
                           )}
-                          <Link
-                            href={`/admin/submissions/${s.submissionId}`}
+                          <button
+                            type="button"
+                            onClick={() => onOpen(s.submissionId)}
                             className="qcard__expand"
                           >
                             Open →
-                          </Link>
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -532,11 +546,13 @@ function QuestionCompare({
   compare,
   study,
   filters,
+  onOpen,
 }: {
   weeks: Week[];
   compare: QuestionCompareData;
   study: Study;
   filters: Filters;
+  onOpen: (id: string) => void;
 }) {
   const { questions, dist, responses } = compare;
   const [localQId, setLocalQId] = useState<string>(questions[0]?.id ?? "");
@@ -719,9 +735,13 @@ function QuestionCompare({
                       <IconStamp kind="flag" />
                     </span>
                   )}
-                  <Link href={`/admin/submissions/${r.submissionId}`} className="qcard__expand">
+                  <button
+                    type="button"
+                    onClick={() => onOpen(r.submissionId)}
+                    className="qcard__expand"
+                  >
                     Open →
-                  </Link>
+                  </button>
                 </div>
               </div>
             ))}

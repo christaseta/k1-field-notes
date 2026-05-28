@@ -1,6 +1,162 @@
 /* Diary Dashboard — scoped to .wf-app
    Ported from claude.ai/design handoff (Diary Dashboard Wireframes v2). */
 
+/* ---- Submission detail modal ------------------------------------- */
+
+.submodal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 16, 16, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px;
+  animation: submodal-fade 120ms ease;
+}
+@keyframes submodal-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.submodal__sheet {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: var(--market-white);
+  border-radius: 20px;
+  padding: 32px 36px;
+  font-family: var(--market-font-sans);
+  color: var(--wf-ink);
+  animation: submodal-pop 140ms ease;
+}
+@keyframes submodal-pop {
+  from {
+    transform: translateY(6px) scale(0.985);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.submodal__close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--wf-ink-2);
+  cursor: pointer;
+}
+.submodal__close:hover {
+  background: var(--wf-bar-2);
+  color: var(--wf-ink);
+}
+
+.submodal__empty {
+  padding: 60px 0;
+  text-align: center;
+  color: var(--wf-ink-3);
+  font-size: 13px;
+}
+
+.submodal__head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.submodal__kind {
+  font-family: var(--market-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wf-ink-3);
+}
+
+.submodal__title {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+
+.submodal__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--wf-ink-2);
+  flex-wrap: wrap;
+}
+.submodal__metaSep {
+  color: var(--wf-ink-3);
+}
+
+.submodal__section {
+  margin-top: 18px;
+}
+.submodal__sectionHead {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wf-ink-3);
+  margin: 0 0 10px;
+}
+
+.submodal__body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--wf-ink);
+  white-space: pre-wrap;
+}
+
+.submodal__answer {
+  background: var(--bcs-page);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.submodal__answerMeta {
+  font-family: var(--market-font-mono);
+  font-size: 10px;
+  color: var(--wf-ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.submodal__answerPrompt {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--wf-ink);
+}
+
+.submodal__answerBody {
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  color: var(--wf-ink-2);
+}
+
 /* ---- Inline admin nav (top-right of every admin page) ------------ */
 
 .admin-nav {
