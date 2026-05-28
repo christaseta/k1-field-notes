@@ -89,12 +89,7 @@ const DEFAULT_FILTERS: Filters = {
   search: "",
 };
 
-type TabId = "digest" | "compare";
-
-const TABS: { id: TabId; label: string; hint: string }[] = [
-  { id: "digest", label: "Weekly digest", hint: "Home" },
-  { id: "compare", label: "Question compare", hint: "By prompt" },
-];
+export type DashboardView = "digest" | "submissions";
 
 export default function Dashboard({
   study,
@@ -102,14 +97,15 @@ export default function Dashboard({
   digests,
   compare,
   participants,
+  view = "digest",
 }: {
   study: Study;
   weeks: Week[];
   digests: WeekDigest[];
   compare: QuestionCompareData;
   participants: ParticipantSummary[];
+  view?: DashboardView;
 }) {
-  const [tab, setTab] = useState<TabId>("digest");
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
 
   const activeFilterCount =
@@ -165,21 +161,6 @@ export default function Dashboard({
         </div>
       </header>
 
-      <nav className="wf-tabs" aria-label="Dashboard view">
-        <div className="wf-tabs__row">
-          {TABS.map((v) => (
-            <button
-              key={v.id}
-              type="button"
-              className={"wf-tab" + (tab === v.id ? " is-active" : "")}
-              onClick={() => setTab(v.id)}
-            >
-              {v.label}
-            </button>
-          ))}
-        </div>
-      </nav>
-
       <FilterBar
         filters={filters}
         setFilters={setFilters}
@@ -190,7 +171,7 @@ export default function Dashboard({
       />
 
       <main className="wf-page">
-        {tab === "digest" ? (
+        {view === "digest" ? (
           <WeeklyDigest
             weeks={weeks}
             digests={digests}
