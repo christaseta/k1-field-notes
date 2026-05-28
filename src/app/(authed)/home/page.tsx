@@ -135,7 +135,7 @@ export default async function HomePage() {
                 <FeedbackCard
                   label="Weekly"
                   modifier="Required"
-                  title={`Week ${week} check-in`}
+                  title={`How did week ${week} go?`}
                   subtitle={subtitleForWeekly(weekly)}
                   pill={weeklyPill}
                   done={weeklyComplete}
