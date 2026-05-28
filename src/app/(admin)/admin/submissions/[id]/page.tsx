@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSubmission } from "@/lib/admin-queries";
+import { displayAnswer } from "@/lib/questions";
 
 export const dynamic = "force-dynamic";
 
@@ -90,7 +91,7 @@ export default async function SubmissionDetailPage({
               </div>
               <div className="text-[15px] font-medium mb-2">{a.prompt}</div>
               <div className="text-[15px] whitespace-pre-wrap leading-relaxed">
-                {a.answer || (
+                {displayAnswer(a) || (
                   <span className="text-[var(--text-subtle)] italic">No answer</span>
                 )}
               </div>

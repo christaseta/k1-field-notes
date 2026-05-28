@@ -169,5 +169,35 @@ export function currentWeeklySet(): QuestionSet {
   return set;
 }
 
+// Map of question_id -> { choice value -> choice label } across every authored
+// set. Used to render human-friendly labels for stored multiple-choice answers
+// in admin/seller views, since submissions store the slug `value`.
+const choiceLabelMap: Record<string, Record<string, string>> = (() => {
+  const map: Record<string, Record<string, string>> = {};
+  const all: QuestionSet[] = [dailyQuestionSet, ...weeklyQuestionSets];
+  for (const set of all) {
+    for (const q of set.questions) {
+      if (q.type === "multiple_choice") {
+        map[q.id] = Object.fromEntries(q.choices.map((c) => [c.value, c.label]));
+      }
+    }
+  }
+  return map;
+})();
+
+/** Resolve a stored answer's display string. For multiple-choice answers,
+ * returns the human-readable choice label (falling back to the raw value if
+ * the question set has since changed). For open-ended answers, returns the
+ * raw text. */
+export function displayAnswer(answer: {
+  question_id: string;
+  type: "multiple_choice" | "open";
+  answer: string | null;
+}): string | null {
+  if (!answer.answer) return null;
+  if (answer.type !== "multiple_choice") return answer.answer;
+  return choiceLabelMap[answer.question_id]?.[answer.answer] ?? answer.answer;
+}
+
 export const SPONTANEOUS_PROMPT =
   "See something at the kiosk? Just hit record and tell us about it — no need to organize your thoughts, just talk.";

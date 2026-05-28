@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Submission } from "@/lib/db-types";
 import { TitleBar } from "@/components/TitleBar";
+import { displayAnswer } from "@/lib/questions";
 
 const KIND_LABEL: Record<Submission["kind"], string> = {
   daily: "Daily",
@@ -75,7 +76,7 @@ function Preview({ submission }: { submission: Submission }) {
     <div className="space-y-1">
       <p className="text-[13px] text-[var(--text-subtle)]">{first.prompt}</p>
       <p className="text-[14px] text-[var(--text-standard)] line-clamp-2">
-        {first.answer ?? "—"}
+        {displayAnswer(first) ?? "—"}
       </p>
     </div>
   );
