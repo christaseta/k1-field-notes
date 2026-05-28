@@ -122,26 +122,9 @@ export default function Dashboard({
     <div className="wf-app">
       <header className="wf-topbar">
         <div className="wf-topbar__row">
-          <div className="wf-brand">Field notes</div>
           <div className="wf-crumb">
             <b>{study.name}</b>
           </div>
-          <Link
-            href="/admin/invite"
-            style={{
-              marginLeft: "auto",
-              padding: "6px 14px",
-              borderRadius: 999,
-              border: "1px solid var(--wf-line)",
-              background: "var(--market-white)",
-              color: "var(--wf-ink)",
-              fontSize: 12,
-              textDecoration: "none",
-              whiteSpace: "nowrap",
-            }}
-          >
-            + Invite seller
-          </Link>
         </div>
         <div className="wf-topbar__row wf-topbar__row--stats">
           <div className="wf-stats">

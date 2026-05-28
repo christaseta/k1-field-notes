@@ -1,4 +1,3 @@
-import Link from "next/link";
 import "../dashboard.css";
 import "./invite.css";
 import InviteForm from "./InviteForm";
@@ -18,16 +17,12 @@ export default async function InvitePage() {
     <div className="wf-app">
       <header className="wf-topbar">
         <div className="wf-topbar__row">
-          <div className="wf-brand">Field notes</div>
           <div className="wf-crumb">
             <b>Invite a seller</b>
           </div>
         </div>
       </header>
       <main className="wf-page">
-        <Link href="/admin" className="invite__backlink">
-          ← Back to dashboard
-        </Link>
         <InviteForm />
 
         <section className="invite__listSection">
