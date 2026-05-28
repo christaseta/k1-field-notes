@@ -156,6 +156,8 @@
 }
 
 .invite__backlink {
+  display: inline-block;
+  margin-bottom: 16px;
   font-size: 13px;
   color: var(--wf-ink-2);
   text-decoration: none;

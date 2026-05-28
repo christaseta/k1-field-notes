@@ -22,14 +22,12 @@ export default async function InvitePage() {
           <div className="wf-crumb">
             <b>Invite a seller</b>
           </div>
-          <div className="wf-stats">
-            <Link href="/admin" className="invite__backlink">
-              ← Dashboard
-            </Link>
-          </div>
         </div>
       </header>
       <main className="wf-page">
+        <Link href="/admin" className="invite__backlink">
+          ← Back to dashboard
+        </Link>
         <InviteForm />
 
         <section className="invite__listSection">
