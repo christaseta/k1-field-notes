@@ -9,7 +9,10 @@ export default async function ThanksPage(props: {
 
   const message = already
     ? `You already submitted ${already === "daily" ? "today's daily" : "this week's"} check-in. Thanks!`
-    : "Thanks! Your note is in.";
+    : "Got it.";
+  const subtitle = already
+    ? "The K1 team will see this in real time."
+    : "We'll pass this along to the team. Thank you.";
 
   return (
     <>
@@ -20,7 +23,7 @@ export default async function ThanksPage(props: {
           {message}
         </h1>
         <p className="text-[14px] text-[var(--text-subtle)]">
-          The K1 team will see this in real time.
+          {subtitle}
         </p>
         <div className="pt-4">
           <Link

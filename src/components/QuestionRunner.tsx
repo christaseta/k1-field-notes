@@ -143,10 +143,10 @@ export function QuestionRunner({ set, kind, variant = "page", onClose }: Props) 
       <div className="flex flex-col items-center text-center space-y-5">
         <Icon name="check-fill" size={48} className="text-white" />
         <h1 className="text-[28px] leading-[32px] -tracking-[0.5px] font-medium text-[var(--text-strong)]">
-          Thanks! Your note is in.
+          Got it.
         </h1>
         <p className="text-[14px] text-[var(--text-subtle)]">
-          The K1 team will see this in real time.
+          We&apos;ll pass this along to the team. Thank you.
         </p>
       </div>
     );
