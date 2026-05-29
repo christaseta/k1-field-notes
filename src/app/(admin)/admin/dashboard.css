@@ -716,7 +716,7 @@
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--wf-ink-3);
+  color: var(--market-gray-65);
   margin-bottom: 6px;
 }
 .qlist__item.is-active .qlist__sourceLabel {
