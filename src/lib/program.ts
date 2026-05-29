@@ -5,8 +5,9 @@
 
 export const PROGRAM_NAME = "Square Kiosk Alpha";
 export const PROGRAM_WEEKS = 5;
-// TODO(christa): replace with actual cohort start date.
-export const PROGRAM_START_DATE = new Date("2026-05-25T00:00:00-07:00");
+// Cohort start: Monday June 1, 2026 (US Pacific). Program runs 5 weeks
+// through Sunday July 5, 2026.
+export const PROGRAM_START_DATE = new Date("2026-06-01T00:00:00-07:00");
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
