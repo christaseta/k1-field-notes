@@ -141,6 +141,23 @@ export type SendSmsResult =
   | { ok: true; sentTo: string }
   | { ok: false; error: string };
 
+export type DeleteSellerResult =
+  | { ok: true }
+  | { ok: false; error: string };
+
+export async function deleteSeller(sellerId: string): Promise<DeleteSellerResult> {
+  if (!sellerId || typeof sellerId !== "string") {
+    return { ok: false, error: "Invalid seller id." };
+  }
+  const supabase = createAdminClient();
+  // Auth admin delete cascades through sellers (FK on auth.users with
+  // on delete cascade) and submissions (FK on sellers with on delete cascade).
+  const { error } = await supabase.auth.admin.deleteUser(sellerId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/admin/invite");
+  return { ok: true };
+}
+
 export async function sendInviteSms(sellerId: string): Promise<SendSmsResult> {
   const supabase = createAdminClient();
   const { data: seller, error } = await supabase
