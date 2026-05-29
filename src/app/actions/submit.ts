@@ -8,6 +8,7 @@ import {
   type Question,
 } from "@/lib/questions";
 import type { FeedbackKind, StoredAnswer } from "@/lib/db-types";
+import { sendSlackNotification } from "@/lib/slack";
 
 type SubmitInput = {
   kind: FeedbackKind;
@@ -85,6 +86,25 @@ export async function submitFeedback(input: SubmitInput) {
   });
 
   if (error) throw new Error(error.message);
+
+  // Fetch seller info for Slack notification
+  const { data: seller } = await supabase
+    .from("sellers")
+    .select("display_name, business_name")
+    .eq("id", user.id)
+    .single();
+
+  // Send Slack notification (non-blocking, won't fail the submission)
+  sendSlackNotification({
+    kind: input.kind,
+    seller: {
+      display_name: seller?.display_name ?? null,
+      business_name: seller?.business_name ?? null,
+    },
+    answers: stored.length > 0 ? stored : undefined,
+    note,
+    tags,
+  });
 }
 
 function isQuestionVisible(
