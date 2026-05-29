@@ -623,23 +623,34 @@ function QuestionCompare({
     <div>
       <div className="qcompare">
         <div className="qlist">
-          {visibleQuestions.map((qq) => (
-            <div
-              key={qq.id}
-              className={"qlist__item" + (qq.id === activeQId ? " is-active" : "")}
-              onClick={() => setActiveQId(qq.id)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") setActiveQId(qq.id);
-              }}
-            >
-              <span className="qkind">{qq.kind}</span>
-              <div style={{ flex: 1 }}>
-                <div className="qlabel">{qq.prompt}</div>
+          {visibleQuestions.map((qq) => {
+            const sourceLabel =
+              qq.source === "daily"
+                ? "Daily"
+                : qq.source === "weekly"
+                  ? "Weekly"
+                  : "Spontaneous";
+            const kindLabel = qq.kind === "MC" ? "Multiple choice" : "Open ended";
+            return (
+              <div
+                key={qq.id}
+                className={"qlist__item" + (qq.id === activeQId ? " is-active" : "")}
+                onClick={() => setActiveQId(qq.id)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") setActiveQId(qq.id);
+                }}
+              >
+                <div style={{ flex: 1 }}>
+                  <div className="qlist__sourceLabel">
+                    {sourceLabel} • {kindLabel}
+                  </div>
+                  <div className="qlabel">{qq.prompt}</div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="qpanel">

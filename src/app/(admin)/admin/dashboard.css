@@ -669,7 +669,7 @@
   overflow: hidden;
 }
 .qlist__item {
-  padding: 12px;
+  padding: 14px 14px;
   border-bottom: 1px solid var(--wf-line-soft);
   cursor: pointer;
   display: flex;
@@ -706,9 +706,21 @@
   text-transform: uppercase;
 }
 .qlabel {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.4;
   flex: 1;
+}
+
+.qlist__sourceLabel {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--wf-ink-3);
+  margin-bottom: 6px;
+}
+.qlist__item.is-active .qlist__sourceLabel {
+  color: var(--market-gray-80);
 }
 .qmeta {
   font-size: 10px;
