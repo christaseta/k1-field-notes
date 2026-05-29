@@ -162,7 +162,7 @@ export function SpontaneousForm() {
             <input
               ref={cameraInputRef}
               type="file"
-              accept="image/*"
+              accept="image/*,video/*"
               capture="environment"
               className="hidden"
               onChange={(e) => {
@@ -173,7 +173,7 @@ export function SpontaneousForm() {
             <input
               ref={libraryInputRef}
               type="file"
-              accept="image/*"
+              accept="image/*,video/*"
               multiple
               className="hidden"
               onChange={(e) => {

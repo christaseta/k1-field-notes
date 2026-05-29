@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { Attachment } from "@/components/AttachmentTray";
 
 const BUCKET = "submission-media";
+const MAX_FILE_BYTES = 50 * 1024 * 1024; // 50 MB — Supabase default upload cap
 
 function extFor(file: File): string {
   const fromName = file.name.split(".").pop();
@@ -29,6 +30,17 @@ export async function uploadAttachmentsToStorage(
   }
   const uid = userData.user.id;
 
+  // Guard against oversized files before kicking off any uploads so we fail
+  // fast and don't leave half-uploaded state.
+  for (const a of attachments) {
+    if (a.file.size > MAX_FILE_BYTES) {
+      const mb = (a.file.size / (1024 * 1024)).toFixed(1);
+      throw new Error(
+        `"${a.file.name}" is ${mb} MB — too large. Max is 50 MB per file.`,
+      );
+    }
+  }
+
   const urls: string[] = [];
   for (const a of attachments) {
     const path = `${uid}/${a.id}.${extFor(a.file)}`;
@@ -39,7 +51,7 @@ export async function uploadAttachmentsToStorage(
         upsert: false,
       });
     if (error) {
-      throw new Error(`Photo upload failed: ${error.message}`);
+      throw new Error(`Upload failed: ${error.message}`);
     }
     const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
     urls.push(pub.publicUrl);
