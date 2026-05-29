@@ -7,6 +7,7 @@ import { Icon } from "@/components/Icon";
 import { AttachmentTray, useAttachments } from "@/components/AttachmentTray";
 import { submitFeedback } from "@/app/actions/submit";
 import { SPONTANEOUS_DRAFT_KEY } from "@/components/VoicePromptHero";
+import { uploadAttachmentsToStorage } from "@/lib/upload-media";
 
 export function SpontaneousForm() {
   const [note, setNote] = useState("");
@@ -75,11 +76,13 @@ export function SpontaneousForm() {
     }
     startTransition(async () => {
       try {
+        const mediaUrls = await uploadAttachmentsToStorage(attachments);
         await submitFeedback({
           kind: "spontaneous",
           note,
           noteInputMethod: method,
           tags: [],
+          mediaUrls,
         });
         router.push("/thanks");
       } catch (e) {
@@ -159,7 +162,7 @@ export function SpontaneousForm() {
             <input
               ref={cameraInputRef}
               type="file"
-              accept="image/*,video/*"
+              accept="image/*"
               capture="environment"
               className="hidden"
               onChange={(e) => {
@@ -170,7 +173,7 @@ export function SpontaneousForm() {
             <input
               ref={libraryInputRef}
               type="file"
-              accept="image/*,video/*"
+              accept="image/*"
               multiple
               className="hidden"
               onChange={(e) => {

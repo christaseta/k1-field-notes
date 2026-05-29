@@ -27,5 +27,6 @@ export type Submission = {
   answers: StoredAnswer[];
   note: string | null;
   tags: string[];
+  media_urls: string[];
   submitted_at: string;
 };

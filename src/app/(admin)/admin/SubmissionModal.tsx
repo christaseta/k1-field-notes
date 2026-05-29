@@ -7,6 +7,7 @@ import {
 } from "@/app/actions/submission";
 import type { SubmissionWithSeller } from "@/lib/admin-queries";
 import { displayAnswer } from "@/lib/questions";
+import { MediaGallery } from "./MediaThumbs";
 
 export default function SubmissionModal({
   id,
@@ -121,6 +122,15 @@ function SubmissionDetailBody({ submission }: { submission: SubmissionWithSeller
         <section className="submodal__section">
           <h3 className="submodal__sectionHead">Note</h3>
           <p className="submodal__body">{submission.note}</p>
+        </section>
+      )}
+
+      {submission.media_urls?.length > 0 && (
+        <section className="submodal__section">
+          <h3 className="submodal__sectionHead">
+            Photos · {submission.media_urls.length}
+          </h3>
+          <MediaGallery urls={submission.media_urls} />
         </section>
       )}
 

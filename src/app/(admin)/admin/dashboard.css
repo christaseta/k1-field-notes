@@ -1,6 +1,45 @@
 /* Diary Dashboard — scoped to .wf-app
    Ported from claude.ai/design handoff (Diary Dashboard Wireframes v2). */
 
+/* ---- Submission media (thumbs + gallery) ------------------------- */
+
+.media-thumbs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.media-thumbs__item {
+  display: inline-block;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bcs-page);
+}
+.media-thumbs__item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.media-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+.media-gallery__item {
+  display: block;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bcs-page);
+  aspect-ratio: 1 / 1;
+}
+.media-gallery__item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* ---- Submission detail modal ------------------------------------- */
 
 .submodal__backdrop {

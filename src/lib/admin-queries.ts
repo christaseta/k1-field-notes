@@ -31,7 +31,7 @@ export async function listSubmissions(
   let query = supabase
     .from("submissions")
     .select(
-      "id, seller_id, kind, question_set_id, answers, note, tags, submitted_at, seller:sellers(id, email, display_name)",
+      "id, seller_id, kind, question_set_id, answers, note, tags, media_urls, submitted_at, seller:sellers(id, email, display_name)",
       { count: "exact" },
     )
     .order("submitted_at", { ascending: false })
@@ -59,7 +59,7 @@ export async function getSubmission(
   const { data, error } = await supabase
     .from("submissions")
     .select(
-      "id, seller_id, kind, question_set_id, answers, note, tags, submitted_at, seller:sellers(id, email, display_name, weekly_day_pref, timezone, created_at)",
+      "id, seller_id, kind, question_set_id, answers, note, tags, media_urls, submitted_at, seller:sellers(id, email, display_name, weekly_day_pref, timezone, created_at)",
     )
     .eq("id", id)
     .maybeSingle();
@@ -125,6 +125,7 @@ export type Spotlight = {
   questionPrompt: string | null;
   text: string;
   flagged: boolean;
+  mediaUrls: string[];
 };
 
 export type CompareQuestion = {
@@ -146,6 +147,7 @@ export type CompareResponse = {
   choiceValue: string | null;
   choiceLabel: string | null;
   flagged: boolean;
+  mediaUrls: string[];
 };
 
 export type QuestionCompareData = {
@@ -267,7 +269,7 @@ export async function getWeeklyDigests(weeks: StudyWeek[]): Promise<WeekDigest[]
 
   const { data: subs } = await supabase
     .from("submissions")
-    .select("id, seller_id, kind, answers, note, tags, submitted_at")
+    .select("id, seller_id, kind, answers, note, tags, media_urls, submitted_at")
     .gte("submitted_at", startISO)
     .lte("submitted_at", endISO)
     .order("submitted_at", { ascending: false });
@@ -351,6 +353,7 @@ export async function getWeeklyDigests(weeks: StudyWeek[]): Promise<WeekDigest[]
         questionPrompt: openAnswer?.prompt ?? (sub.note ? "Spontaneous note" : null),
         text,
         flagged: tags.some((t) => FLAGGED_TAGS.has(t)),
+        mediaUrls: sub.media_urls ?? [],
       };
     });
   }
@@ -396,7 +399,7 @@ export async function getQuestionCompareData(
 
   const { data: subs } = await supabase
     .from("submissions")
-    .select("id, seller_id, kind, answers, note, tags, submitted_at")
+    .select("id, seller_id, kind, answers, note, tags, media_urls, submitted_at")
     .gte("submitted_at", startISO)
     .lte("submitted_at", endISO)
     .order("submitted_at", { ascending: false });
@@ -451,8 +454,9 @@ export async function getQuestionCompareData(
     const sellerInitials = seller ? initialsFor(seller) : "?";
     const flagged = (sub.tags ?? []).some((t) => FLAGGED_TAGS.has(t));
     const weekShort = shortFmt.format(new Date(sub.submitted_at));
+    const mediaUrls: string[] = sub.media_urls ?? [];
 
-    if (sub.kind === "spontaneous" && sub.note?.trim()) {
+    if (sub.kind === "spontaneous" && (sub.note?.trim() || mediaUrls.length > 0)) {
       responses["__spontaneous__"].push({
         submissionId: sub.id,
         sellerId: sub.seller_id,
@@ -460,10 +464,11 @@ export async function getQuestionCompareData(
         sellerInitials,
         weekId: week.id,
         weekShort,
-        text: sub.note.trim(),
+        text: sub.note?.trim() || null,
         choiceValue: null,
         choiceLabel: null,
         flagged,
+        mediaUrls,
       });
       continue;
     }
@@ -484,6 +489,7 @@ export async function getQuestionCompareData(
           choiceValue: ans.answer,
           choiceLabel: choiceLabel[ans.question_id]?.[ans.answer] ?? ans.answer,
           flagged,
+          mediaUrls,
         });
       } else if (ans.type === "open" && ans.answer?.trim()) {
         responses[ans.question_id].push({
@@ -497,6 +503,7 @@ export async function getQuestionCompareData(
           choiceValue: null,
           choiceLabel: null,
           flagged,
+          mediaUrls,
         });
       }
     }

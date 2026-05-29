@@ -9,7 +9,7 @@ export type Attachment = {
   kind: "image" | "video";
 };
 
-const MAX_ATTACHMENTS = 4;
+const MAX_ATTACHMENTS = 5;
 
 export function makeAttachment(file: File): Attachment {
   return {

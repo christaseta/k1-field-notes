@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Fragment, useMemo, useState } from "react";
 import AdminNav from "./AdminNav";
 import SubmissionModal from "./SubmissionModal";
+import { MediaThumbs } from "./MediaThumbs";
 
 export type ParticipantSummary = { id: string; name: string; initials: string };
 
@@ -16,6 +17,7 @@ export type Spotlight = {
   questionPrompt: string | null;
   text: string;
   flagged: boolean;
+  mediaUrls: string[];
 };
 
 export type WeekDigest = {
@@ -46,6 +48,7 @@ export type CompareResponse = {
   choiceValue: string | null;
   choiceLabel: string | null;
   flagged: boolean;
+  mediaUrls: string[];
 };
 
 export type QuestionCompareData = {
@@ -352,7 +355,7 @@ function FilterBar({
               type="button"
               className={"wf-toggle" + (hasMedia ? " is-on" : "")}
               onClick={() => setFilters({ ...filters, hasMedia: !hasMedia })}
-              title="Submissions with photos. No media uploaded yet, so this filter currently hides everything."
+              title="Submissions with at least one photo attached"
             >
               <span className="wf-toggle__box" />
               Has media
@@ -495,6 +498,9 @@ function WeeklyDigest({
                         <Sentiment value="neu" />
                         <div className="spotlight__body">&ldquo;{s.text}&rdquo;</div>
                       </div>
+                      {s.mediaUrls.length > 0 && (
+                        <MediaThumbs urls={s.mediaUrls} size={40} />
+                      )}
                       <div className="spotlight__foot">
                         <div className="pchip">
                           <span className="pchip__avatar">{s.sellerInitials}</span>
@@ -592,13 +598,11 @@ function QuestionCompare({
 
   const filteredResponses = useMemo(() => {
     const search = filters.search.trim().toLowerCase();
-    // Photos / images aren't in the schema yet; the toggle is wired but
-    // hides everything until media support exists.
-    if (filters.hasMedia) return [];
     return allResponses.filter((r) => {
       if (filters.week !== "ALL" && r.weekId !== filters.week) return false;
       if (filters.participant !== "ALL" && r.sellerId !== filters.participant) return false;
       if (filters.flagged && !r.flagged) return false;
+      if (filters.hasMedia && r.mediaUrls.length === 0) return false;
       if (search) {
         const hay = `${r.text ?? ""} ${r.choiceLabel ?? ""} ${r.sellerName}`.toLowerCase();
         if (!hay.includes(search)) return false;
@@ -760,6 +764,11 @@ function QuestionCompare({
                           no response
                         </span>
                       ))}
+                    {r.mediaUrls.length > 0 && (
+                      <div style={{ marginTop: 6 }}>
+                        <MediaThumbs urls={r.mediaUrls} size={32} />
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", alignItems: "center" }}>

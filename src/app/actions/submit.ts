@@ -20,6 +20,8 @@ type SubmitInput = {
   noteInputMethod?: "voice" | "text";
   // Spontaneous-only — research-defined topic tags.
   tags?: string[];
+  // Photo URLs uploaded to the submission-media bucket; spontaneous-only for now.
+  mediaUrls?: string[];
 };
 
 export async function submitFeedback(input: SubmitInput) {
@@ -68,6 +70,10 @@ export async function submitFeedback(input: SubmitInput) {
     .map((t) => t.trim())
     .filter((t) => t.length > 0);
 
+  const mediaUrls = Array.isArray(input.mediaUrls)
+    ? input.mediaUrls.filter((u) => typeof u === "string" && u.length > 0)
+    : [];
+
   const { error } = await supabase.from("submissions").insert({
     seller_id: user.id,
     kind: input.kind,
@@ -75,6 +81,7 @@ export async function submitFeedback(input: SubmitInput) {
     answers: stored,
     note,
     tags,
+    media_urls: mediaUrls,
   });
 
   if (error) throw new Error(error.message);
