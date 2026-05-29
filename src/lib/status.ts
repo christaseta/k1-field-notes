@@ -26,5 +26,5 @@ export function weeklyStatus(
   // Friday is day 5; weeks reset Sunday, so Saturday is the only day the
   // weekly check-in can be late without rolling into the next period.
   if (now.getDay() === 6) return { variant: "overdue", label: "OVERDUE" };
-  return { variant: "due", label: "DUE FRIDAY" };
+  return { variant: "due", label: "COMPLETE BY SUNDAY" };
 }
