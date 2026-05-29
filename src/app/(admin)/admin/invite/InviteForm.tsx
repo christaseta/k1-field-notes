@@ -70,12 +70,16 @@ export default function InviteForm() {
           <button type="submit" className="invite__submit" disabled={isPending}>
             {isPending ? "Generating…" : "Generate invite link"}
           </button>
+          {/* Email is always sent; this hidden input makes that explicit
+              and matches the per-row Copy Link button which omits it. */}
+          <input type="hidden" name="send_email" value="on" />
           <label className="invite__sendSms">
             <input type="checkbox" name="send_sms" />
             <span>Also send via SMS</span>
           </label>
           <p className="invite__hint">
-            Single-use link, expires in ~60 min. Phone must be E.164 (e.g. +14155551234).
+            We&apos;ll email the magic link to this seller. Single-use, expires in
+            ~60 min. Phone must be E.164 (e.g. +14155551234) for SMS.
           </p>
         </div>
       </form>
@@ -89,6 +93,16 @@ export default function InviteForm() {
               {state.created ? "New seller" : "Existing seller"}
             </span>
             <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              {state.emailSent && (
+                <span className="invite__badge" style={{ background: "var(--wf-pos)", color: "var(--market-white)" }}>
+                  Email sent ✓
+                </span>
+              )}
+              {state.emailError && (
+                <span className="invite__badge" style={{ background: "var(--wf-accent-tint)", color: "var(--wf-accent)" }}>
+                  Email error: {state.emailError}
+                </span>
+              )}
               {state.smsSent && (
                 <span className="invite__badge" style={{ background: "var(--wf-pos)", color: "var(--market-white)" }}>
                   SMS sent ✓

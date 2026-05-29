@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendSms } from "@/lib/twilio";
 
@@ -12,6 +13,8 @@ export type InviteResult =
       phone: string | null;
       smsSent?: boolean;
       smsError?: string;
+      emailSent?: boolean;
+      emailError?: string;
     }
   | { ok: false; error: string };
 
@@ -49,6 +52,35 @@ function smsBody(displayName: string | null, url: string): string {
   return `${greeting}you're invited to the Square Kiosk Alpha. Tap to sign in (link expires in ~60 min): ${url}`;
 }
 
+/**
+ * Send Supabase's magic-link email to the seller via the standard OTP
+ * channel. The seller's email template (Authentication → Email Templates
+ * → Magic Link) controls the body. The link inside this email is *not*
+ * the same as the one we generated via admin.generateLink for the
+ * admin to copy — Supabase generates a fresh single-use token of its own.
+ * Both work; whichever the seller clicks first signs them in.
+ */
+async function sendMagicLinkEmail(email: string): Promise<void> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anon) throw new Error("Supabase env vars are missing.");
+  const sellerUrl =
+    process.env.SELLER_SITE_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "http://localhost:3000";
+  const client = createSupabaseClient(url, anon, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+  const { error } = await client.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: false,
+      emailRedirectTo: `${sellerUrl.replace(/\/$/, "")}/auth/callback?next=${encodeURIComponent("/home")}`,
+    },
+  });
+  if (error) throw error;
+}
+
 export async function generateInviteLink(
   _prev: InviteResult | null,
   formData: FormData,
@@ -58,6 +90,7 @@ export async function generateInviteLink(
   const businessName = String(formData.get("business_name") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
   const sendSmsFlag = formData.get("send_sms") === "on";
+  const sendEmailFlag = formData.get("send_email") === "on";
 
   if (!email || !email.includes("@")) {
     return { ok: false, error: "Enter a valid email address." };
@@ -126,6 +159,17 @@ export async function generateInviteLink(
     }
   }
 
+  let emailSent: boolean | undefined;
+  let emailError: string | undefined;
+  if (sendEmailFlag) {
+    try {
+      await sendMagicLinkEmail(email);
+      emailSent = true;
+    } catch (e) {
+      emailError = e instanceof Error ? e.message : "Email send failed.";
+    }
+  }
+
   revalidatePath("/admin/invite");
   return {
     ok: true,
@@ -134,6 +178,8 @@ export async function generateInviteLink(
     phone: finalPhone,
     smsSent,
     smsError,
+    emailSent,
+    emailError,
   };
 }
 
