@@ -6,7 +6,10 @@
 import type { FeedbackKind, StoredAnswer, Seller } from "./db-types";
 import { displayAnswer } from "./questions";
 
-const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL;
+// Read inside function to ensure it's available in serverless environment
+function getSlackWebhookUrl() {
+  return process.env.SLACK_WEBHOOK_URL;
+}
 
 type SlackBlock =
   | { type: "header"; text: { type: "plain_text"; text: string; emoji?: boolean } }
@@ -126,11 +129,13 @@ function buildSlackBlocks(notification: SubmissionNotification): SlackBlock[] {
 export async function sendSlackNotification(
   notification: SubmissionNotification
 ): Promise<void> {
-  console.log("sendSlackNotification called with:", JSON.stringify(notification));
-  console.log("SLACK_WEBHOOK_URL exists:", !!SLACK_WEBHOOK_URL);
-  console.log("SLACK_WEBHOOK_URL value:", SLACK_WEBHOOK_URL ? SLACK_WEBHOOK_URL.substring(0, 50) + "..." : "NOT SET");
+  const webhookUrl = getSlackWebhookUrl();
   
-  if (!SLACK_WEBHOOK_URL) {
+  console.log("sendSlackNotification called with:", JSON.stringify(notification));
+  console.log("SLACK_WEBHOOK_URL exists:", !!webhookUrl);
+  console.log("SLACK_WEBHOOK_URL value:", webhookUrl ? webhookUrl.substring(0, 50) + "..." : "NOT SET");
+  
+  if (!webhookUrl) {
     console.warn("SLACK_WEBHOOK_URL not configured, skipping notification");
     return;
   }
@@ -139,7 +144,7 @@ export async function sendSlackNotification(
 
   try {
     console.log("Sending Slack notification...");
-    const response = await fetch(SLACK_WEBHOOK_URL, {
+    const response = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
