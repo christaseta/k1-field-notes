@@ -74,7 +74,7 @@ export default async function HomePage() {
       }}
     >
       <TitleBar />
-      <div className="flex-1 max-w-md w-full mx-auto px-4 pt-6 pb-8 flex flex-col gap-10 animate-fade-in">
+      <div className="flex-1 max-w-md w-full mx-auto px-4 pt-6 pb-[120px] flex flex-col gap-10 animate-fade-in">
         <section>
         <div className="flex justify-end">
           <Link
@@ -150,7 +150,12 @@ export default async function HomePage() {
           ))}
         </section>
 
-        <div className="mt-auto">
+      </div>
+      <div
+        className="fixed bottom-0 left-0 right-0 z-40 px-4 pt-2 pointer-events-none"
+        style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
+      >
+        <div className="max-w-md mx-auto pointer-events-auto">
           <VoicePromptHero />
         </div>
       </div>
