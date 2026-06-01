@@ -65,7 +65,7 @@ export default async function HomePage() {
 
   return (
     <div
-      className="min-h-[100dvh] flex flex-col"
+      className="h-[100dvh] flex flex-col"
       style={{
         backgroundImage: "url(/dot-bg.png)",
         backgroundSize: "100% auto",
@@ -74,7 +74,7 @@ export default async function HomePage() {
       }}
     >
       <TitleBar />
-      <div className="flex-1 max-w-md w-full mx-auto px-4 pt-6 pb-[120px] flex flex-col gap-10 animate-fade-in">
+      <div className="flex-1 min-h-0 overflow-y-auto max-w-md w-full mx-auto px-4 pt-6 pb-6 flex flex-col gap-10 animate-fade-in">
         <section>
         <div className="flex justify-end">
           <Link
@@ -152,10 +152,10 @@ export default async function HomePage() {
 
       </div>
       <div
-        className="fixed bottom-0 left-0 right-0 z-40 px-4 pt-2 pointer-events-none"
+        className="shrink-0 px-4 pt-2"
         style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
       >
-        <div className="max-w-md mx-auto pointer-events-auto">
+        <div className="max-w-md mx-auto">
           <VoicePromptHero />
         </div>
       </div>
