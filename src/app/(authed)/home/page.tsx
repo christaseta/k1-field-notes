@@ -74,7 +74,7 @@ export default async function HomePage() {
       }}
     >
       <TitleBar />
-      <div className="flex-1 max-w-md w-full mx-auto px-4 pt-6 pb-8 flex flex-col animate-fade-in">
+      <div className="flex-1 max-w-md w-full mx-auto px-4 pt-6 pb-8 flex flex-col gap-10 animate-fade-in">
         <section>
         <div className="flex justify-end">
           <Link
@@ -109,7 +109,7 @@ export default async function HomePage() {
         Completed cards drop to the bottom so the next thing-to-do is always
         in the most reachable position.
       */}
-      <section className="flex flex-col gap-1 my-auto -mx-2">
+      <section className="flex flex-col gap-1 -mx-2">
         {[
           {
             key: "daily",
@@ -150,7 +150,7 @@ export default async function HomePage() {
           ))}
         </section>
 
-        <div>
+        <div className="mt-auto">
           <VoicePromptHero />
         </div>
       </div>
