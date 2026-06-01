@@ -94,17 +94,22 @@ export async function submitFeedback(input: SubmitInput) {
     .eq("id", user.id)
     .single();
 
-  // Send Slack notification (non-blocking, won't fail the submission)
-  sendSlackNotification({
-    kind: input.kind,
-    seller: {
-      display_name: seller?.display_name ?? null,
-      business_name: seller?.business_name ?? null,
-    },
-    answers: stored.length > 0 ? stored : undefined,
-    note,
-    tags,
-  });
+  // Send Slack notification (awaited to ensure it completes before function ends)
+  try {
+    await sendSlackNotification({
+      kind: input.kind,
+      seller: {
+        display_name: seller?.display_name ?? null,
+        business_name: seller?.business_name ?? null,
+      },
+      answers: stored.length > 0 ? stored : undefined,
+      note,
+      tags,
+    });
+  } catch (e) {
+    // Log but don't fail the submission
+    console.error("Slack notification error:", e);
+  }
 }
 
 function isQuestionVisible(
