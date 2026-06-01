@@ -88,13 +88,16 @@ export async function submitFeedback(input: SubmitInput) {
   if (error) throw new Error(error.message);
 
   // Fetch seller info for Slack notification
-  const { data: seller } = await supabase
+  const { data: seller, error: sellerError } = await supabase
     .from("sellers")
     .select("display_name, business_name")
     .eq("id", user.id)
     .single();
 
+  console.log("Seller fetch result:", { seller, sellerError, userId: user.id });
+
   // Send Slack notification (awaited to ensure it completes before function ends)
+  console.log("About to send Slack notification...");
   try {
     await sendSlackNotification({
       kind: input.kind,
@@ -106,6 +109,7 @@ export async function submitFeedback(input: SubmitInput) {
       note,
       tags,
     });
+    console.log("Slack notification completed successfully");
   } catch (e) {
     // Log but don't fail the submission
     console.error("Slack notification error:", e);
