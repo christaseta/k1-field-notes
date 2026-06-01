@@ -126,6 +126,10 @@ function buildSlackBlocks(notification: SubmissionNotification): SlackBlock[] {
 export async function sendSlackNotification(
   notification: SubmissionNotification
 ): Promise<void> {
+  console.log("sendSlackNotification called with:", JSON.stringify(notification));
+  console.log("SLACK_WEBHOOK_URL exists:", !!SLACK_WEBHOOK_URL);
+  console.log("SLACK_WEBHOOK_URL value:", SLACK_WEBHOOK_URL ? SLACK_WEBHOOK_URL.substring(0, 50) + "..." : "NOT SET");
+  
   if (!SLACK_WEBHOOK_URL) {
     console.warn("SLACK_WEBHOOK_URL not configured, skipping notification");
     return;
@@ -134,6 +138,7 @@ export async function sendSlackNotification(
   const blocks = buildSlackBlocks(notification);
 
   try {
+    console.log("Sending Slack notification...");
     const response = await fetch(SLACK_WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -144,8 +149,12 @@ export async function sendSlackNotification(
       }),
     });
 
+    console.log("Slack response status:", response.status);
     if (!response.ok) {
-      console.error("Slack notification failed:", response.status, await response.text());
+      const errorText = await response.text();
+      console.error("Slack notification failed:", response.status, errorText);
+    } else {
+      console.log("Slack notification sent successfully!");
     }
   } catch (error) {
     // Don't throw - we don't want Slack failures to break submissions
