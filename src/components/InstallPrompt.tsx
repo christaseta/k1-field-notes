@@ -94,8 +94,8 @@ export function InstallPrompt() {
 
   return (
     <div
-      className="fixed bottom-16 left-0 right-0 bg-black text-white px-4 pt-4 shadow-lg z-50 border-b border-[var(--divider)]"
-      style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))" }}
+      className="fixed top-0 left-0 right-0 bg-black text-white px-4 pb-4 shadow-lg z-50 border-b border-[var(--divider)]"
+      style={{ paddingTop: "calc(1rem + env(safe-area-inset-top))" }}
     >
       <div className="max-w-md mx-auto flex items-center justify-between gap-4">
         <div className="flex-1 min-w-0">
