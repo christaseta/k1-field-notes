@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { appSurface } from "@/lib/app-surface";
 
-const PUBLIC_PATHS = ["/signin", "/auth/callback", "/auth/error"];
+const PUBLIC_PATHS = ["/signin", "/auth/callback", "/auth/error", "/api/debug-slack"];
 
 function checkBasicAuth(
   header: string | null,
