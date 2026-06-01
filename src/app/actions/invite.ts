@@ -9,7 +9,6 @@ export type InviteResult =
       ok: true;
       url: string;
       created: boolean;
-      phone: string | null;
       emailSent?: boolean;
       emailError?: string;
     }
@@ -83,7 +82,6 @@ export async function generateInviteLink(
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const displayName = String(formData.get("display_name") ?? "").trim();
   const businessName = String(formData.get("business_name") ?? "").trim();
-  const phone = String(formData.get("phone") ?? "").trim();
   const sendEmailFlag = formData.get("send_email") === "on";
 
   if (!email || !email.includes("@")) {
@@ -114,25 +112,16 @@ export async function generateInviteLink(
   // Update seller row labels. Only overwrite fields if a value was provided.
   // (Cast: createAdminClient isn't generic over the Database schema, so
   // .update() infers 'never' for the payload type.)
-  if (displayName || businessName || phone) {
-    const patch: { display_name?: string; business_name?: string; phone?: string } = {};
+  if (displayName || businessName) {
+    const patch: { display_name?: string; business_name?: string } = {};
     if (displayName) patch.display_name = displayName;
     if (businessName) patch.business_name = businessName;
-    if (phone) patch.phone = phone;
     await (supabase.from("sellers") as unknown as {
       update: (v: typeof patch) => { eq: (col: string, val: string) => Promise<unknown> };
     })
       .update(patch)
       .eq("id", user.id);
   }
-
-  // Fetch the (possibly updated) seller row so we know the canonical phone.
-  const { data: seller } = await supabase
-    .from("sellers")
-    .select("phone")
-    .eq("id", user.id)
-    .maybeSingle();
-  const finalPhone = (seller as { phone?: string | null } | null)?.phone ?? null;
 
   const link = await generateLinkFor(email);
   if (!link.ok) return { ok: false, error: link.error };
@@ -153,7 +142,6 @@ export async function generateInviteLink(
     ok: true,
     url: link.url,
     created,
-    phone: finalPhone,
     emailSent,
     emailError,
   };

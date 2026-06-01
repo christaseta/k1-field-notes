@@ -55,16 +55,6 @@ export default function InviteForm() {
               className="wf-search"
             />
           </label>
-          <label className="invite__field">
-            <span className="invite__label">Phone (for SMS invite)</span>
-            <input
-              name="phone"
-              type="tel"
-              placeholder="+14155551234"
-              autoComplete="off"
-              className="wf-search"
-            />
-          </label>
         </div>
         <div className="invite__actions">
           <button type="submit" className="invite__submit" disabled={isPending}>
