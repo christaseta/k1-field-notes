@@ -134,7 +134,6 @@ export function QuestionRunner({ set, kind, variant = "page", onClose }: Props) 
       onSubmit={onNext}
       placeholder={current.placeholder}
       pending={pending}
-      autoFocus
     />
   ) : null;
 

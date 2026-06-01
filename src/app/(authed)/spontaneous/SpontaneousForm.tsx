@@ -105,7 +105,6 @@ export function SpontaneousForm() {
           ref={textareaRef}
           value={note}
           rows={2}
-          autoFocus
           onChange={(e) => {
             const next = e.target.value;
             setMethod("text");
