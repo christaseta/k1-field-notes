@@ -94,7 +94,7 @@ export function InstallPrompt() {
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 bg-black text-white px-4 pb-4 shadow-lg z-50 border-b border-[var(--divider)]"
+      className="sticky top-0 left-0 right-0 bg-black text-white px-4 pb-4 shadow-lg z-50 border-b border-[var(--divider)]"
       style={{ paddingTop: "calc(1rem + env(safe-area-inset-top))" }}
     >
       <div className="max-w-md mx-auto flex items-center justify-between gap-4">
