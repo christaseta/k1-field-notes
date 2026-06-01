@@ -43,11 +43,12 @@ export async function updateSession(request: NextRequest) {
         headers: { "WWW-Authenticate": ADMIN_REALM },
       });
     }
-    // Only allow admin/auth/signin/root paths; everything else 404s.
+    // Only allow admin/auth/signin/api/root paths; everything else 404s.
     if (
       !pathname.startsWith("/admin") &&
       !pathname.startsWith("/signin") &&
       !pathname.startsWith("/auth") &&
+      !pathname.startsWith("/api") &&
       pathname !== "/"
     ) {
       return new NextResponse("Not Found", { status: 404 });
