@@ -2,7 +2,6 @@ import "../dashboard.css";
 import "./invite.css";
 import InviteForm from "./InviteForm";
 import CopyLinkButton from "./CopyLinkButton";
-import SendSmsButton from "./SendSmsButton";
 import DeleteSellerButton from "./DeleteSellerButton";
 import AdminNav from "../AdminNav";
 import { listSellers } from "@/lib/admin-queries";
@@ -47,7 +46,6 @@ export default async function InvitePage() {
                 <span>Submissions</span>
                 <span>Joined</span>
                 <span>Invite link</span>
-                <span>SMS</span>
                 <span>Delete</span>
               </div>
               {sorted.map((s) => (
@@ -71,9 +69,6 @@ export default async function InvitePage() {
                   </span>
                   <span>
                     <CopyLinkButton email={s.email} />
-                  </span>
-                  <span>
-                    <SendSmsButton sellerId={s.id} hasPhone={!!s.phone} />
                   </span>
                   <span>
                     <DeleteSellerButton

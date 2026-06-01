@@ -73,13 +73,9 @@ export default function InviteForm() {
           {/* Email is always sent; this hidden input makes that explicit
               and matches the per-row Copy Link button which omits it. */}
           <input type="hidden" name="send_email" value="on" />
-          <label className="invite__sendSms">
-            <input type="checkbox" name="send_sms" />
-            <span>Also send via SMS</span>
-          </label>
           <p className="invite__hint">
             We&apos;ll email the magic link to this seller. Single-use, expires in
-            ~60 min. Phone must be E.164 (e.g. +14155551234) for SMS.
+            ~60 min.
           </p>
         </div>
       </form>
@@ -101,16 +97,6 @@ export default function InviteForm() {
               {state.emailError && (
                 <span className="invite__badge" style={{ background: "var(--wf-accent-tint)", color: "var(--wf-accent)" }}>
                   Email error: {state.emailError}
-                </span>
-              )}
-              {state.smsSent && (
-                <span className="invite__badge" style={{ background: "var(--wf-pos)", color: "var(--market-white)" }}>
-                  SMS sent ✓
-                </span>
-              )}
-              {state.smsError && (
-                <span className="invite__badge" style={{ background: "var(--wf-accent-tint)", color: "var(--wf-accent)" }}>
-                  SMS error: {state.smsError}
                 </span>
               )}
               <button

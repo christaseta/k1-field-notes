@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendSms } from "@/lib/twilio";
 
 export type InviteResult =
   | {
@@ -11,8 +10,6 @@ export type InviteResult =
       url: string;
       created: boolean;
       phone: string | null;
-      smsSent?: boolean;
-      smsError?: string;
       emailSent?: boolean;
       emailError?: string;
     }
@@ -47,11 +44,6 @@ async function generateLinkFor(email: string): Promise<
   return { ok: true, url: url.toString() };
 }
 
-function smsBody(displayName: string | null, url: string): string {
-  const greeting = displayName ? `Hi ${displayName.split(" ")[0]}, ` : "";
-  return `${greeting}you're invited to the Square Kiosk Alpha. Tap to sign in (link expires in ~60 min): ${url}`;
-}
-
 /**
  * Send Supabase's magic-link email to the seller via the standard OTP
  * channel. The seller's email template (Authentication → Email Templates
@@ -71,10 +63,13 @@ async function sendMagicLinkEmail(email: string): Promise<void> {
   const client = createSupabaseClient(url, anon, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
+  // We always pre-create + confirm the user in the action that calls this,
+  // so signup-allowance here is a no-op in practice. Leaving the flag at
+  // default (allow) sidesteps Supabase's "Signups not allowed for otp" error
+  // when the project's email provider has signups disabled.
   const { error } = await client.auth.signInWithOtp({
     email,
     options: {
-      shouldCreateUser: false,
       emailRedirectTo: `${sellerUrl.replace(/\/$/, "")}/auth/callback?next=${encodeURIComponent("/home")}`,
     },
   });
@@ -89,7 +84,6 @@ export async function generateInviteLink(
   const displayName = String(formData.get("display_name") ?? "").trim();
   const businessName = String(formData.get("business_name") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
-  const sendSmsFlag = formData.get("send_sms") === "on";
   const sendEmailFlag = formData.get("send_email") === "on";
 
   if (!email || !email.includes("@")) {
@@ -135,29 +129,13 @@ export async function generateInviteLink(
   // Fetch the (possibly updated) seller row so we know the canonical phone.
   const { data: seller } = await supabase
     .from("sellers")
-    .select("display_name, phone")
+    .select("phone")
     .eq("id", user.id)
     .maybeSingle();
-  const finalDisplayName = (seller as { display_name?: string | null } | null)?.display_name ?? null;
   const finalPhone = (seller as { phone?: string | null } | null)?.phone ?? null;
 
   const link = await generateLinkFor(email);
   if (!link.ok) return { ok: false, error: link.error };
-
-  let smsSent: boolean | undefined;
-  let smsError: string | undefined;
-  if (sendSmsFlag) {
-    if (!finalPhone) {
-      smsError = "No phone number on file.";
-    } else {
-      try {
-        await sendSms(finalPhone, smsBody(finalDisplayName, link.url));
-        smsSent = true;
-      } catch (e) {
-        smsError = e instanceof Error ? e.message : "SMS send failed.";
-      }
-    }
-  }
 
   let emailSent: boolean | undefined;
   let emailError: string | undefined;
@@ -176,16 +154,10 @@ export async function generateInviteLink(
     url: link.url,
     created,
     phone: finalPhone,
-    smsSent,
-    smsError,
     emailSent,
     emailError,
   };
 }
-
-export type SendSmsResult =
-  | { ok: true; sentTo: string }
-  | { ok: false; error: string };
 
 export type DeleteSellerResult =
   | { ok: true }
@@ -204,25 +176,3 @@ export async function deleteSeller(sellerId: string): Promise<DeleteSellerResult
   return { ok: true };
 }
 
-export async function sendInviteSms(sellerId: string): Promise<SendSmsResult> {
-  const supabase = createAdminClient();
-  const { data: seller, error } = await supabase
-    .from("sellers")
-    .select("email, phone, display_name")
-    .eq("id", sellerId)
-    .maybeSingle();
-  if (error) return { ok: false, error: error.message };
-  if (!seller) return { ok: false, error: "Seller not found." };
-  const s = seller as { email: string; phone: string | null; display_name: string | null };
-  if (!s.phone) return { ok: false, error: "No phone number on file for this seller." };
-
-  const link = await generateLinkFor(s.email);
-  if (!link.ok) return { ok: false, error: link.error };
-
-  try {
-    await sendSms(s.phone, smsBody(s.display_name, link.url));
-  } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "SMS send failed." };
-  }
-  return { ok: true, sentTo: s.phone };
-}
