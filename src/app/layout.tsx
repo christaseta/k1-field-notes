@@ -46,8 +46,8 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <ServiceWorkerRegistration />
-        {children}
         {appSurface() === "seller" && <InstallPrompt />}
+        {children}
       </body>
     </html>
   );
