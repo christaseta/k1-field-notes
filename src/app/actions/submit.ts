@@ -108,6 +108,7 @@ export async function submitFeedback(input: SubmitInput) {
       answers: stored.length > 0 ? stored : undefined,
       note,
       tags,
+      mediaUrls: mediaUrls.length > 0 ? mediaUrls : undefined,
     });
     console.log("Slack notification completed successfully");
   } catch (e) {

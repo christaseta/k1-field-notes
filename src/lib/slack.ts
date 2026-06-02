@@ -15,7 +15,8 @@ type SlackBlock =
   | { type: "header"; text: { type: "plain_text"; text: string; emoji?: boolean } }
   | { type: "section"; text: { type: "mrkdwn"; text: string }; accessory?: object }
   | { type: "divider" }
-  | { type: "context"; elements: Array<{ type: "mrkdwn"; text: string }> };
+  | { type: "context"; elements: Array<{ type: "mrkdwn"; text: string }> }
+  | { type: "image"; image_url: string; alt_text: string; title?: { type: "plain_text"; text: string } };
 
 type SubmissionNotification = {
   kind: FeedbackKind;
@@ -23,6 +24,7 @@ type SubmissionNotification = {
   answers?: StoredAnswer[];
   note?: string | null;
   tags?: string[];
+  mediaUrls?: string[];
 };
 
 function formatKindEmoji(kind: FeedbackKind): string {
@@ -109,6 +111,49 @@ function buildSlackBlocks(notification: SubmissionNotification): SlackBlock[] {
           },
         ],
       });
+    }
+  }
+
+  // Media attachments (photos/videos)
+  if (notification.mediaUrls && notification.mediaUrls.length > 0) {
+    blocks.push({ type: "divider" });
+    
+    // Add a label for media section
+    blocks.push({
+      type: "context",
+      elements: [
+        {
+          type: "mrkdwn",
+          text: `📎 *${notification.mediaUrls.length} attachment${notification.mediaUrls.length > 1 ? "s" : ""}*`,
+        },
+      ],
+    });
+
+    for (let i = 0; i < notification.mediaUrls.length; i++) {
+      const url = notification.mediaUrls[i];
+      const isVideo = url.match(/\.(mp4|mov|webm|avi)$/i);
+      
+      if (isVideo) {
+        // Slack webhooks don't support video blocks, so we link to it
+        blocks.push({
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `🎥 <${url}|Video ${i + 1}>`,
+          },
+        });
+      } else {
+        // Images can be displayed inline
+        blocks.push({
+          type: "image",
+          image_url: url,
+          alt_text: `Attachment ${i + 1}`,
+          title: {
+            type: "plain_text",
+            text: `Photo ${i + 1}`,
+          },
+        });
+      }
     }
   }
 
