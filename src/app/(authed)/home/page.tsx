@@ -10,6 +10,7 @@ import { dailyStatus, weeklyStatus } from "@/lib/status";
 import Image from "next/image";
 import Link from "next/link";
 import { HomeVoiceHeroSlot } from "@/components/HomeVoiceHeroSlot";
+import { HomeGrainBackground } from "@/components/HomeGrainBackground";
 import { TitleBar } from "@/components/TitleBar";
 import { FeedbackCard } from "@/components/FeedbackCard";
 import { FeedbackCardSheet } from "@/components/FeedbackCardSheet";
@@ -64,15 +65,8 @@ export default async function HomePage() {
   const week = currentProgramWeek(now);
 
   return (
-    <div
-      className="h-[100dvh] flex flex-col"
-      style={{
-        backgroundImage: "url(/dot-bg.png)",
-        backgroundSize: "100% auto",
-        backgroundPosition: "top",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
+    <div className="relative h-[100dvh] flex flex-col bg-black">
+      <HomeGrainBackground />
       <TitleBar />
       <div className="flex-1 min-h-0 overflow-y-auto max-w-md w-full mx-auto px-4 pt-6 pb-6 flex flex-col gap-10 animate-fade-in">
         <section>
