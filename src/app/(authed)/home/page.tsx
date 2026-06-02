@@ -9,7 +9,7 @@ import { currentProgramWeek, programLabel, timeOfDayGreeting } from "@/lib/progr
 import { dailyStatus, weeklyStatus } from "@/lib/status";
 import Image from "next/image";
 import Link from "next/link";
-import { VoicePromptHero } from "@/components/VoicePromptHero";
+import { HomeVoiceHeroSlot } from "@/components/HomeVoiceHeroSlot";
 import { TitleBar } from "@/components/TitleBar";
 import { FeedbackCard } from "@/components/FeedbackCard";
 import { FeedbackCardSheet } from "@/components/FeedbackCardSheet";
@@ -156,7 +156,7 @@ export default async function HomePage() {
         style={{ paddingBottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
       >
         <div className="max-w-md mx-auto">
-          <VoicePromptHero />
+          <HomeVoiceHeroSlot />
         </div>
       </div>
     </div>
