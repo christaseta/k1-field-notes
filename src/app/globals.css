@@ -127,6 +127,12 @@ body {
   }
 }
 
+/* Hide the home-page voice hero whenever a Sheet is open. The Sheet
+   component adds `sheet-open` to <body> while it's mounted. */
+body.sheet-open .home-voice-hero-slot {
+  display: none;
+}
+
 /* Disable iOS tap highlight; we use explicit active states instead. */
 * {
   -webkit-tap-highlight-color: transparent;

@@ -15,7 +15,7 @@ export function HomeVoiceHeroSlot() {
   const pathname = usePathname();
   if (pathname !== "/home") return null;
   return (
-    <div className="relative z-0">
+    <div className="home-voice-hero-slot relative z-0">
       <VoicePromptHero />
     </div>
   );
