@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/actions/auth";
 import { SettingsPageShell } from "./SettingsPageShell";
+import { InstallInstructionsCard } from "@/components/InstallInstructionsCard";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -10,7 +11,8 @@ export default async function SettingsPage() {
 
   return (
     <SettingsPageShell>
-      <div className="max-w-md w-full mx-auto px-4 pt-6 pb-6 space-y-1">
+      <div className="max-w-md w-full mx-auto px-4 pt-6 pb-6 space-y-3">
+        <InstallInstructionsCard />
         <div className="bg-[#1A1A1A] rounded-3xl p-6 space-y-3">
           <p className="text-[16px] text-[var(--text-subtle)]">Signed in as</p>
           <p className="text-[16px] text-[var(--text-strong)] break-all">
