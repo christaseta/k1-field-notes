@@ -31,13 +31,17 @@ export function HomeGrainBackground() {
     >
       <GrainGradient
         style={{ width: "100%", height: "100%" }}
-        colorBack="#000000"
-        colors={["#1a1a1a", "#2a2a2a", "#0f0f0f"]}
+        colorBack="#000A0F"
+        colors={["#878787", "#393939", "#1D1D1D"]}
         shape="wave"
-        softness={0.7}
-        intensity={0.35}
-        noise={0.6}
-        speed={reduceMotion ? 0 : 0.35}
+        softness={0.76}
+        intensity={0}
+        noise={0.92}
+        scale={2.11}
+        rotation={193}
+        offsetX={-0.69}
+        offsetY={-0.43}
+        speed={reduceMotion ? 0 : 0.57}
       />
     </div>
   );
