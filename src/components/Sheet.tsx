@@ -26,9 +26,11 @@ export function Sheet({
     window.addEventListener("keydown", onKey);
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    document.body.classList.add("sheet-open");
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prevOverflow;
+      document.body.classList.remove("sheet-open");
     };
   }, [open, onClose]);
 
